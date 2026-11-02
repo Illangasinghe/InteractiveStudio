@@ -1,0 +1,22 @@
+import path from 'node:path';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { FileProjectRepository } from '../server/repository';
+import { analyseAudio } from '../server/audio';
+
+const option = (name: string) => process.argv.slice(2).find(arg => arg.startsWith(`--${name}=`))?.slice(name.length + 3);
+const id = option('id'); const file = option('file'); const role = option('role');
+if (!id || !file || !['vocals', 'other'].includes(role || '')) throw new Error('Usage: npm run import:stem -- --id=ID --file=FILE --role=vocals|other');
+const extension = path.extname(file).toLowerCase();
+if (!['.wav', '.mp3'].includes(extension)) throw new Error('Choose a WAV or MP3 stem.');
+const repository = new FileProjectRepository(path.resolve(process.env.STUDIO_DATA_DIR || 'data'));
+const project = await repository.get(id);
+const directory = repository.projectDirectory(id);
+const [bytes, analysis, source] = await Promise.all([readFile(file), analyseAudio(path.resolve(file)), readFile(path.join(directory, 'audio_source.json'), 'utf8').then(JSON.parse).catch(() => ({}))]);
+const sha256 = createHash('sha256').update(bytes).digest('hex');
+const relativePath = `audio/${sha256}${extension}`;
+await mkdir(path.join(directory, 'audio'), { recursive: true });
+await writeFile(path.join(directory, relativePath), bytes, { flag: 'wx' }).catch(error => { if (error.code !== 'EEXIST') throw error; });
+const differenceSec = analysis.durationSec - project.durationSec;
+await writeFile(path.join(directory, 'audio_source.json'), JSON.stringify({ ...source, stems: { ...source.stems, [role!]: { originalName: path.basename(file), relativePath, sha256, bytes: bytes.length, durationSec: analysis.durationSec, differenceFromMasterSec: differenceSec, importedAt: new Date().toISOString(), alignmentStatus: 'Duration measured; stem offset requires listening review.' } } }, null, 2));
+console.log(`Preserved ${role} stem: ${analysis.durationSec.toFixed(6)}s (${differenceSec.toFixed(6)}s difference from master).`);

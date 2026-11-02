@@ -1,0 +1,48 @@
+import path from 'node:path';
+import { readdir, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { createHash } from 'node:crypto';
+import { FileProjectRepository } from '../server/repository';
+import { EpisodeProjectSchema } from '../packages/core/index';
+import { importRhubarbCues, recognizedWords } from '../workers/rhubarb';
+
+const execute = promisify(execFile);
+const args = process.argv.slice(2);
+const option = (name: string) => args.find(arg => arg.startsWith(`--${name}=`))?.slice(name.length + 3);
+const id = option('id');
+if (!id) throw new Error('Usage: npm run lipsync -- --id=PROJECT_ID [--rhubarb=EXE] [--vocals=FILE] [--duration=SECONDS] [--replace]');
+const repository = new FileProjectRepository(path.resolve(process.env.STUDIO_DATA_DIR || 'data'));
+const project = await repository.get(id);
+if (!project.audio.master) throw new Error('Import source audio first.');
+if (project.mouthCues.length && !args.includes('--replace')) throw new Error('Existing cues are preserved. Use --replace deliberately to replace them.');
+let rhubarb = option('rhubarb') || process.env.RHUBARB_PATH;
+if (!rhubarb) {
+  const candidates = await readdir(path.resolve('.tools/rhubarb'), { withFileTypes: true }).catch(() => []);
+  const directory = candidates.find(entry => entry.isDirectory() && entry.name.startsWith('Rhubarb-Lip-Sync-'));
+  rhubarb = directory ? path.resolve('.tools/rhubarb', directory.name, 'rhubarb.exe') : 'rhubarb';
+}
+const directory = repository.projectDirectory(id);
+const source = await readFile(path.join(directory, 'audio_source.json'), 'utf8').then(JSON.parse).catch(() => ({}));
+const storedVocals = source.stems?.vocals?.relativePath;
+if (storedVocals && !/^audio\/[a-f0-9]{64}\.(wav|mp3)$/.test(storedVocals)) throw new Error('Stored vocal-stem path is invalid.');
+const usingVocals = Boolean(option('vocals') || storedVocals);
+const durationSec = option('duration') ? Number(option('duration')) : project.durationSec;
+if (!Number.isFinite(durationSec) || durationSec <= 0 || durationSec > project.durationSec) throw new Error('Analysis duration must be positive and within the master duration.');
+const analysisDirectory = path.join(directory, 'derived', `rhubarb-${Date.now()}`);
+await mkdir(analysisDirectory, { recursive: true });
+const input = option('vocals') ? path.resolve(option('vocals')!) : path.join(directory, storedVocals || project.audio.master);
+const pcm = path.join(analysisDirectory, 'analysis-proxy.wav');
+const dialogue = path.join(analysisDirectory, 'dialogue.txt');
+const output = path.join(analysisDirectory, 'mouth-cues.raw.json');
+const log = path.join(analysisDirectory, 'recognition.log');
+await writeFile(dialogue, project.transcript);
+await execute(process.env.FFMPEG_PATH || 'ffmpeg', ['-v', 'error', '-i', input, '-t', String(durationSec), '-vn', '-ac', '1', '-ar', '16000', '-c:a', 'pcm_s16le', pcm], { timeout: 60000, windowsHide: true });
+console.log('Generating local mouth-cue suggestions. Singing and background music may reduce accuracy.');
+await execute(rhubarb, ['-f', 'json', '-r', 'pocketSphinx', '-d', dialogue, '--extendedShapes', 'GHX', '--threads', '2', '--logFile', log, '--logLevel', 'debug', '-o', output, pcm], { timeout: 300000, maxBuffer: 8 * 1024 * 1024, windowsHide: true });
+const cues = importRhubarbCues(JSON.parse(await readFile(output, 'utf8')), durationSec);
+const words = recognizedWords(await readFile(log, 'utf8'));
+await writeFile(path.join(analysisDirectory, 'recognized-words.json'), JSON.stringify(words, null, 2));
+await writeFile(path.join(analysisDirectory, 'provenance.json'), JSON.stringify({ status: 'unreviewed', coverageSec: durationSec, projectDurationSec: project.durationSec, method: 'Rhubarb pocketSphinx with supplied lyrics hint', source: usingVocals ? 'separate user-provided vocal file' : 'full song mix, not an isolated vocal stem', audioSha256: createHash('sha256').update(await readFile(input)).digest('hex'), transcriptSha256: createHash('sha256').update(project.transcript).digest('hex'), rhubarbVersion: (await execute(rhubarb, ['--version'], { windowsHide: true })).stdout.trim(), generatedAt: new Date().toISOString(), notes: 'These are speech-recognition suggestions, not verified singing alignment. Review against the original recording before approving content. Beyond coverageSec, the mouth remains idle.' }, null, 2));
+const saved = await repository.save(EpisodeProjectSchema.parse({ ...project, mouthCues: cues, review: { contentApproved: false } }));
+console.log(`Saved ${cues.length} unreviewed mouth cues and ${words.length} recognized word suggestions to project revision ${saved.revision}.\nAnalysis: ${analysisDirectory}`);

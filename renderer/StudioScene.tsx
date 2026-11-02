@@ -21,36 +21,46 @@ function captionLines(caption: string) {
   return lines;
 }
 
-function Mouth({ shape }: { shape: MouthShape }) {
+function Mouth({ shape, progress = 0.5 }: { shape: MouthShape; progress?: number }) {
   if (shape === 'X' || shape === 'A') {
     return <path d="M-15 20 Q0 31 15 20" fill="none" stroke="#704331" strokeWidth="5" strokeLinecap="round" />;
   }
-  const height = shape === 'D' || shape === 'E' ? 23 : shape === 'B' ? 9 : 16;
-  const width = shape === 'F' || shape === 'H' ? 10 : 19;
+  const openEnvelope = 0.72 + 0.28 * Math.sin(Math.max(0, Math.min(1, progress)) * Math.PI);
+  const baseHeight = shape === 'D' || shape === 'E' ? 23 : shape === 'B' ? 9 : 16;
+  const baseWidth = shape === 'F' || shape === 'H' ? 10 : 19;
+  const height = Math.max(5, baseHeight * openEnvelope);
+  const width = Math.max(8, baseWidth * (0.85 + 0.15 * openEnvelope));
   return (
     <g>
       <ellipse cy="26" rx={width} ry={height} fill="#6f3d35" />
-      {height > 12 && <ellipse cy={26 + height * 0.55} rx={width * 0.65} ry={height * 0.3} fill="#de8e8a" />}
+      {height > 11 && <ellipse cy={26 + height * 0.55} rx={width * 0.65} ry={height * 0.3} fill="#de8e8a" />}
       {(shape === 'B' || shape === 'G') && <path d={`M${-width + 3} 21 H${width - 3}`} stroke="#fff8e9" strokeWidth="5" />}
     </g>
   );
 }
 
-function Kangaroo({ x, y, index, timeSec, action, reducedMotion, mouth }: {
+function Kangaroo({ x, y, index, timeSec, action, reducedMotion, mouth, mouthProgress = 0.5 }: {
   x: number; y: number; index: number; timeSec: number; action: string;
-  reducedMotion: boolean; mouth: MouthShape;
+  reducedMotion: boolean; mouth: MouthShape; mouthProgress?: number;
 }) {
   const phase = timeSec * Math.PI * (action === 'bounce' ? 1.6 : 0.6) + index * 0.65;
-  const bob = reducedMotion ? 0 : action === 'jump' ? -Math.max(0, Math.sin(phase)) * 65 : Math.sin(phase) * (action === 'bounce' ? 16 : 4);
-  const tilt = reducedMotion ? 0 : Math.sin(phase) * (action === 'bounce' ? 3 : 1);
+  const sinPhase = Math.sin(phase);
+  const bob = reducedMotion ? 0 : action === 'jump' ? -Math.max(0, sinPhase) * 65 : sinPhase * (action === 'bounce' ? 16 : 4);
+  const squashY = reducedMotion ? 1 : action === 'jump' || action === 'bounce' ? 1 + Math.max(0, sinPhase) * 0.045 - Math.max(0, -sinPhase) * 0.045 : 1;
+  const squashX = 2 - squashY;
+  const tilt = reducedMotion ? 0 : sinPhase * (action === 'bounce' ? 3 : 1);
+  const tailSwing = reducedMotion ? 0 : Math.cos(phase - 0.4) * (action === 'bounce' || action === 'jump' ? 8 : 3);
+  const earLag = reducedMotion ? 0 : Math.cos(phase - 0.3) * (action === 'bounce' || action === 'jump' ? 5 : 2);
   const wave = reducedMotion ? -15 : action === 'wave' ? -40 + Math.sin(timeSec * 7) * 16 : 0;
   const blink = !reducedMotion && (timeSec + index * 0.47) % 4.2 > 4.04;
   const coat = coats[index % coats.length];
+  const shadowScale = reducedMotion ? 1 : Math.max(0.6, 1 + bob / 150);
+  const shadowOpacity = reducedMotion ? 0.15 : Math.max(0.06, 0.15 + bob / 650);
   return (
     <g transform={`translate(${x} ${y})`}>
-      <ellipse cx="14" cy="155" rx="102" ry="19" fill="#658d56" opacity="0.15" />
-      <g transform={`translate(0 ${bob}) rotate(${tilt})`}>
-        <path d="M43 73 C107 84 109 145 165 147 C125 166 62 149 21 119Z" fill={coat} />
+      <ellipse cx="14" cy="155" rx={102 * shadowScale} ry={19 * shadowScale} fill="#658d56" opacity={shadowOpacity} />
+      <g transform={`translate(0 ${bob}) rotate(${tilt}) scale(${squashX} ${squashY})`}>
+        <path d="M43 73 C107 84 109 145 165 147 C125 166 62 149 21 119Z" fill={coat} transform={`rotate(${tailSwing} 43 95)`} />
         <ellipse cx="-46" cy="144" rx="61" ry="19" fill={coat} transform="rotate(-6 -46 144)" />
         <ellipse cx="46" cy="145" rx="60" ry="18" fill={coat} transform="rotate(7 46 145)" />
         <path d="M-53-38 C-98 20-87 109-40 132 Q0 156 45 129 C91 93 84 14 51-38Z" fill={coat} />
@@ -63,17 +73,21 @@ function Kangaroo({ x, y, index, timeSec, action, reducedMotion, mouth }: {
         <path d="M-51-5 Q-88 15-87 52" fill="none" stroke={coat} strokeWidth="27" strokeLinecap="round" />
         <ellipse cx="-86" cy="56" rx="14" ry="20" fill={coat} transform="rotate(18 -86 56)" />
         <g transform="translate(0 -79)">
-          <path d="M-40-58 C-88-124-83-207-58-177 Q-21-133-17-66Z" fill={coat} />
-          <path d="M-39-82 C-66-128-70-169-59-153 Q-38-123-29-83Z" fill="#e9b7a3" />
-          <path d="M20-64 C19-140 55-201 64-172 Q78-108 44-57Z" fill={coat} />
-          <path d="M31-84 C32-127 53-169 54-147 Q57-112 41-79Z" fill="#e9b7a3" />
+          <g transform={`rotate(${-earLag} -30 -60)`}>
+            <path d="M-40-58 C-88-124-83-207-58-177 Q-21-133-17-66Z" fill={coat} />
+            <path d="M-39-82 C-66-128-70-169-59-153 Q-38-123-29-83Z" fill="#e9b7a3" />
+          </g>
+          <g transform={`rotate(${earLag} 30 -60)`}>
+            <path d="M20-64 C19-140 55-201 64-172 Q78-108 44-57Z" fill={coat} />
+            <path d="M31-84 C32-127 53-169 54-147 Q57-112 41-79Z" fill="#e9b7a3" />
+          </g>
           <path d="M-64-44 C-58-100 59-108 66-44 Q80 16 33 39 Q0 57-41 33 Q-78 15-64-44Z" fill={coat} />
           <ellipse cy="8" rx="49" ry="35" fill="#f3d7b5" />
           <ellipse cx="-42" cy="2" rx="12" ry="7" fill="#d98c77" opacity="0.55" />
           <ellipse cx="42" cy="2" rx="12" ry="7" fill="#d98c77" opacity="0.55" />
           {blink ? <g stroke="#493c32" strokeWidth="5" fill="none" strokeLinecap="round"><path d="M-38-24 Q-29-18-20-24" /><path d="M20-24 Q29-18 38-24" /></g> : <g><ellipse cx="-29" cy="-26" rx="6.5" ry="10" fill="#493c32" /><ellipse cx="29" cy="-26" rx="6.5" ry="10" fill="#493c32" /><circle cx="-27" cy="-29" r="2" fill="#fff" /><circle cx="31" cy="-29" r="2" fill="#fff" /></g>}
           <path d="M-10 4 Q0-3 10 4 Q9 15 0 16 Q-9 14-10 4Z" fill="#704331" />
-          <Mouth shape={mouth} />
+          <Mouth shape={mouth} progress={mouthProgress} />
           <path d="M-18-77 Q-2-94 16-80" fill="none" stroke={coat} strokeWidth="13" strokeLinecap="round" />
         </g>
       </g>
@@ -96,8 +110,9 @@ export function StudioScene({ project, timeSec }: { project: EpisodeProject; tim
     const progress = Math.max(0, Math.min(1, (sampleTime - shot.startSec) / (shot.endSec - shot.startSec)));
     const focus = shot.story ? getStoryFocus(shot, project.preferences.reducedMotion ? .5 : progress) : { x: 960, y: 540 };
     const pose = cameraPose(shot.camera, progress, focus, project.preferences.reducedMotion);
-    if (shot.story) return <g transform={pose.transform}><StoryScene project={project} timeSec={sampleTime} scene={shot} /></g>;
+    if (shot.story) return <g transform={pose.transform}><StoryScene project={project} timeSec={sampleTime} scene={shot} backdropTransform={pose.backdropTransform} foregroundTransform={pose.foregroundTransform} /></g>;
     const cue = project.mouthCues.find(candidate => sampleTime >= candidate.startSec && sampleTime < candidate.endSec);
+    const cueProgress = cue && cue.endSec > cue.startSec ? Math.max(0, Math.min(1, (sampleTime - cue.startSec) / (cue.endSec - cue.startSec))) : 0.5;
     const indoor = shot.backgroundId === 'bedroom-day';
     const garden = shot.backgroundId === 'garden-day';
     const clinic = shot.backgroundId === 'clinic-day';
@@ -105,9 +120,9 @@ export function StudioScene({ project, timeSec }: { project: EpisodeProject; tim
     const left = 960 - (shot.characterIds.length - 1) * gap / 2;
     const groundY = indoor ? 655 : garden ? 635 : 687;
     return <g transform={pose.transform}>
-      {indoor ? <BedroomBackdrop /> : garden ? <GardenBackdrop /> : clinic ? <StoryClinicSet /> : <MeadowBackdrop />}
-      {shot.characterIds.map((id, index) => <Kangaroo key={id} x={left + index * gap} y={groundY + (index % 2) * 12} index={Math.max(0, Number(id.split('-')[1]) - 1)} timeSec={sampleTime - shot.startSec} action={shot.actionId} reducedMotion={project.preferences.reducedMotion} mouth={id === 'roo-1' ? cue?.value ?? 'X' : 'X'} />)}
-      {indoor ? <BedroomForeground /> : garden ? <GardenForeground /> : clinic ? null : <MeadowForeground />}
+      <g transform={pose.backdropTransform}>{indoor ? <BedroomBackdrop /> : garden ? <GardenBackdrop /> : clinic ? <StoryClinicSet /> : <MeadowBackdrop />}</g>
+      {shot.characterIds.map((id, index) => <Kangaroo key={id} x={left + index * gap} y={groundY + (index % 2) * 12} index={Math.max(0, Number(id.split('-')[1]) - 1)} timeSec={sampleTime - shot.startSec} action={shot.actionId} reducedMotion={project.preferences.reducedMotion} mouth={id === 'roo-1' ? cue?.value ?? 'X' : 'X'} mouthProgress={cueProgress} />)}
+      {clinic ? null : <g transform={pose.foregroundTransform}>{indoor ? <BedroomForeground /> : garden ? <GardenForeground /> : <MeadowForeground />}</g>}
     </g>;
   };
   const countLabel = scene.story && scene.backgroundId === 'bedroom-day' ? 'ON THE BED' : scene.story && scene.backgroundId === 'garden-day' ? 'ON THE TRAMPOLINE' : 'KANGAROOS';

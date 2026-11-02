@@ -36,7 +36,9 @@ export function getStoryFocus(scene: Scene, progress: number) {
  * SVG world only: the caller owns camera transforms, dissolves, captions and count UI.
  * Counted child IDs stay separate from adult actors and an explicitly departing child.
  */
-export function StoryScene({ project, scene, timeSec }: { project: EpisodeProject; scene: Scene; timeSec: number }) {
+export function StoryScene({ project, scene, timeSec, backdropTransform, foregroundTransform }: {
+  project: EpisodeProject; scene: Scene; timeSec: number; backdropTransform?: string; foregroundTransform?: string;
+}) {
   if (!scene.story) return null;
   const { beatId, actorIds, featuredCharacterId = 'roo-1', speakingActorId } = scene.story as StoryDirective;
   const time = Math.max(0, timeSec - scene.startSec);
@@ -44,13 +46,14 @@ export function StoryScene({ project, scene, timeSec }: { project: EpisodeProjec
   const reducedMotion = project.preferences.reducedMotion;
   const progress = reducedMotion ? 0.5 : clamp(time / duration);
   const cue = project.mouthCues.find(candidate => timeSec >= candidate.startSec && timeSec < candidate.endSec);
+  const cueProgress = cue && cue.endSec > cue.startSec ? clamp((timeSec - cue.startSec) / (cue.endSec - cue.startSec)) : 0.5;
   const actors = new Set(actorIds);
   const isGarden = beatId === 'trampoline' || beatId === 'family-finale';
   const isClinic = beatId === 'doctor-advice' || beatId === 'dentist';
   const speaker = speakingActorId ?? 'roo-1';
   const mouthFor = (id: string) => id === speaker ? cue?.value ?? 'X' : 'X';
-  const bedGroup = (pose: 'idle' | 'bounce' | 'wave' | 'sleep' | 'moonwalk' = 'idle', excludeFeatured = false) => scene.characterIds.filter(id => !excludeFeatured || id !== featuredCharacterId).map(id => <RooPuppet key={id} id={id} x={bedX(id)} y={805} scale={0.78} time={time} pose={pose} reducedMotion={reducedMotion} mouth={mouthFor(id)} />);
-  const father = (pose: 'idle' | 'surprised' | 'phone' | 'point' | 'wave' = 'idle') => actors.has('dad') ? <RooPuppet actor="dad" x={1510} y={930} scale={1.2} time={time} pose={pose} expression={pose === 'surprised' ? 'surprised' : pose === 'phone' ? 'thoughtful' : 'happy'} reducedMotion={reducedMotion} mouth={mouthFor('dad')} /> : null;
+  const bedGroup = (pose: 'idle' | 'bounce' | 'wave' | 'sleep' | 'moonwalk' = 'idle', excludeFeatured = false) => scene.characterIds.filter(id => !excludeFeatured || id !== featuredCharacterId).map(id => <RooPuppet key={id} id={id} x={bedX(id)} y={805} scale={0.78} time={time} pose={pose} reducedMotion={reducedMotion} mouth={mouthFor(id)} mouthProgress={cueProgress} />);
+  const father = (pose: 'idle' | 'surprised' | 'phone' | 'point' | 'wave' = 'idle', yOffset = 0, squashX = 1, squashY = 1) => actors.has('dad') ? <RooPuppet actor="dad" x={1510} y={930 + yOffset} scale={1.2} time={time} pose={pose} expression={pose === 'surprised' ? 'surprised' : pose === 'phone' ? 'thoughtful' : 'happy'} reducedMotion={reducedMotion} mouth={mouthFor('dad')} mouthProgress={cueProgress} squashX={squashX} squashY={squashY} /> : null;
   const clinicActor = beatId === 'dentist' ? 'dentist' : 'doctor';
   let action;
 
@@ -63,8 +66,12 @@ export function StoryScene({ project, scene, timeSec }: { project: EpisodeProjec
       break;
     case 'leap': {
       const flight = leapFlightProgress(progress);
+      const anticipation = !reducedMotion && progress >= 0.42 && progress < 0.65 ? Math.sin(((progress - 0.42) / 0.23) * Math.PI) : 0;
       const point = leapPosition(scene, flight);
-      action = <>{bedGroup('bounce', true)}{father('surprised')}<RooPuppet id={featuredCharacterId} x={point.x} y={point.y} scale={0.78 - 0.14 * flight} time={time} pose="leap" rotation={reducedMotion ? 0 : point.rotation} reducedMotion={reducedMotion} mouth={mouthFor(featuredCharacterId)} shadow={false} /></>;
+      const crouchY = anticipation * 18;
+      const leapSquashY = anticipation > 0 ? 1 - anticipation * 0.14 : flight > 0 ? 1 + Math.sin(flight * Math.PI) * 0.12 : 1;
+      const leapSquashX = 2 - leapSquashY;
+      action = <>{bedGroup('bounce', true)}{father('surprised')}<RooPuppet id={featuredCharacterId} x={point.x} y={point.y + crouchY} scale={0.78 - 0.14 * flight} time={time} pose={flight > 0 ? 'leap' : 'bounce'} rotation={reducedMotion || flight === 0 ? 0 : point.rotation} reducedMotion={reducedMotion} mouth={mouthFor(featuredCharacterId)} mouthProgress={cueProgress} shadow={flight === 0} squashX={leapSquashX} squashY={leapSquashY} /></>;
       break;
     }
     case 'dad-reaction': {
@@ -73,7 +80,10 @@ export function StoryScene({ project, scene, timeSec }: { project: EpisodeProjec
       const point = leapPosition(scene, flight);
       const contactTime = Math.max(0, time - duration * REACTION_CONTACT_PROGRESS);
       const settle = reducedMotion || !contact ? 0 : Math.sin(contactTime * 9) * Math.exp(-contactTime * 3) * 9;
-      action = <>{bedGroup('idle', true)}{father('surprised')}<RooPuppet id={featuredCharacterId} x={point.x} y={point.y + settle} scale={0.78 - 0.14 * flight} time={time} pose={contact ? 'idle' : 'leap'} rotation={contact || reducedMotion ? 0 : point.rotation} reducedMotion={reducedMotion} mouth={mouthFor(featuredCharacterId)} shadow={false} />{contact ? <><Sparkle x={1694} y={523} scale={0.85} /><Sparkle x={1341} y={542} scale={0.55} /></> : null}</>;
+      const dadImpact = reducedMotion || !contact ? 0 : Math.sin(contactTime * 11) * Math.exp(-contactTime * 3.5);
+      const dadSquashY = 1 - Math.max(0, dadImpact) * 0.08;
+      const dadSquashX = 2 - dadSquashY;
+      action = <>{bedGroup('idle', true)}{father('surprised', Math.max(0, dadImpact) * 14, dadSquashX, dadSquashY)}<RooPuppet id={featuredCharacterId} x={point.x} y={point.y + settle} scale={0.78 - 0.14 * flight} time={time} pose={contact ? 'idle' : 'leap'} rotation={contact || reducedMotion ? 0 : point.rotation} reducedMotion={reducedMotion} mouth={mouthFor(featuredCharacterId)} mouthProgress={cueProgress} shadow={false} />{contact ? <><Sparkle x={1694} y={523} scale={0.85} /><Sparkle x={1341} y={542} scale={0.55} /></> : null}</>;
       break;
     }
     case 'dad-phone':
@@ -82,7 +92,7 @@ export function StoryScene({ project, scene, timeSec }: { project: EpisodeProjec
     case 'doctor-advice':
     case 'dentist': {
       const adviceMode = beatId === 'dentist' || speaker === clinicActor;
-      action = <>{actors.has(clinicActor) ? <RooPuppet actor={clinicActor} x={985} y={932} scale={1.35} time={time} pose={adviceMode ? 'point' : 'phone'} reducedMotion={reducedMotion} mouth={mouthFor(clinicActor)} /> : null}{adviceMode ? <><RestIllustration x={1374} y={478} scale={0.86} kind={beatId === 'dentist' ? 'tooth' : 'bed'} /><path d="M1250 591 L1189 630 L1230 554" fill="#fffbef" /></> : null}</>;
+      action = <>{actors.has(clinicActor) ? <RooPuppet actor={clinicActor} x={985} y={932} scale={1.35} time={time} pose={adviceMode ? 'point' : 'phone'} reducedMotion={reducedMotion} mouth={mouthFor(clinicActor)} mouthProgress={cueProgress} /> : null}{adviceMode ? <><RestIllustration x={1374} y={478} scale={0.86} kind={beatId === 'dentist' ? 'tooth' : 'bed'} /><path d="M1250 591 L1189 630 L1230 554" fill="#fffbef" /></> : null}</>;
       break;
     }
     case 'cat-reaction':
@@ -93,7 +103,7 @@ export function StoryScene({ project, scene, timeSec }: { project: EpisodeProjec
       break;
     case 'trampoline':
     case 'family-finale':
-      action = <>{scene.characterIds.map((id, index) => <RooPuppet key={id} id={id} x={430 + (scene.characterIds.length > 1 ? index * 1060 / (scene.characterIds.length - 1) : 530)} y={794} scale={0.75} time={time} pose={beatId === 'family-finale' ? 'wave' : 'bounce'} reducedMotion={reducedMotion} mouth={id === 'roo-1' ? cue?.value ?? 'X' : 'X'} />)}{actors.has('dad') ? <RooPuppet actor="dad" x={1745} y={960} scale={0.95} time={time} pose="wave" reducedMotion={reducedMotion} /> : null}{actors.has('mum') ? <RooPuppet actor="mum" x={150} y={960} scale={0.95} time={time} pose="wave" reducedMotion={reducedMotion} /> : null}</>;
+      action = <>{scene.characterIds.map((id, index) => <RooPuppet key={id} id={id} x={430 + (scene.characterIds.length > 1 ? index * 1060 / (scene.characterIds.length - 1) : 530)} y={794} scale={0.75} time={time} pose={beatId === 'family-finale' ? 'wave' : 'bounce'} reducedMotion={reducedMotion} mouth={id === 'roo-1' ? cue?.value ?? 'X' : 'X'} mouthProgress={cueProgress} />)}{actors.has('dad') ? <RooPuppet actor="dad" x={1745} y={960} scale={0.95} time={time} pose="wave" reducedMotion={reducedMotion} /> : null}{actors.has('mum') ? <RooPuppet actor="mum" x={150} y={960} scale={0.95} time={time} pose="wave" reducedMotion={reducedMotion} /> : null}</>;
       break;
     default:
       action = <>{bedGroup('idle')}{father('idle')}</>;
@@ -101,8 +111,8 @@ export function StoryScene({ project, scene, timeSec }: { project: EpisodeProjec
 
   return <g data-story-beat={beatId}>
     <defs><linearGradient id="story-sky" x2="0" y2="1"><stop stopColor="#e1eee7" /><stop offset="1" stopColor="#f9f1d7" /></linearGradient></defs>
-    {isGarden ? <GardenBackdrop /> : isClinic ? <StoryClinicSet /> : scene.backgroundId === 'meadow-day' ? <MeadowBackdrop /> : <StoryBedroomSet />}
+    <g transform={backdropTransform}>{isGarden ? <GardenBackdrop /> : isClinic ? <StoryClinicSet /> : scene.backgroundId === 'meadow-day' ? <MeadowBackdrop /> : <StoryBedroomSet />}</g>
     {action}
-    {isGarden ? <GardenForeground /> : isClinic ? null : scene.backgroundId === 'meadow-day' ? <MeadowForeground /> : <StoryBedForeground />}
+    {isClinic ? null : <g transform={foregroundTransform}>{isGarden ? <GardenForeground /> : scene.backgroundId === 'meadow-day' ? <MeadowForeground /> : <StoryBedForeground />}</g>}
   </g>;
 }

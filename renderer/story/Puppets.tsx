@@ -8,12 +8,15 @@ type Expression = 'happy' | 'surprised' | 'sleepy' | 'thoughtful';
 const COATS = ['#bd7b55', '#d09b70', '#b98969', '#c89168', '#a87458'];
 const CLOTHES: Record<Exclude<StoryActorId, 'cat'>, string> = { dad: '#6f9992', mum: '#b19db9', doctor: '#faf7ec', vet: '#b7ceaf', handyman: '#d0a260', laundry: '#8daebe', dentist: '#faf7ec' };
 
-function Mouth({ shape, expression }: { shape: MouthShape; expression: Expression }) {
+function Mouth({ shape, expression, progress = 0.5 }: { shape: MouthShape; expression: Expression; progress?: number }) {
   if (expression === 'surprised') return <ellipse cy="26" rx="12" ry="17" fill="#6f3d35" />;
   if (shape === 'X' || shape === 'A') return <path d="M-15 20 Q0 31 15 20" fill="none" stroke="#704331" strokeWidth="5" strokeLinecap="round" />;
-  const height = shape === 'D' || shape === 'E' ? 23 : shape === 'B' ? 9 : 16;
-  const width = shape === 'F' || shape === 'H' ? 10 : 19;
-  return <g><ellipse cy="26" rx={width} ry={height} fill="#6f3d35" />{height > 12 ? <ellipse cy={26 + height * 0.55} rx={width * 0.65} ry={height * 0.3} fill="#de8e8a" /> : null}{shape === 'B' || shape === 'G' ? <path d={`M${-width + 3} 21 H${width - 3}`} stroke="#fff8e9" strokeWidth="5" /> : null}</g>;
+  const openEnvelope = 0.72 + 0.28 * Math.sin(Math.max(0, Math.min(1, progress)) * Math.PI);
+  const baseHeight = shape === 'D' || shape === 'E' ? 23 : shape === 'B' ? 9 : 16;
+  const baseWidth = shape === 'F' || shape === 'H' ? 10 : 19;
+  const height = Math.max(5, baseHeight * openEnvelope);
+  const width = Math.max(8, baseWidth * (0.85 + 0.15 * openEnvelope));
+  return <g><ellipse cy="26" rx={width} ry={height} fill="#6f3d35" />{height > 11 ? <ellipse cy={26 + height * 0.55} rx={width * 0.65} ry={height * 0.3} fill="#de8e8a" /> : null}{shape === 'B' || shape === 'G' ? <path d={`M${-width + 3} 21 H${width - 3}`} stroke="#fff8e9" strokeWidth="5" /> : null}</g>;
 }
 
 function Outfit({ actor }: { actor: Exclude<StoryActorId, 'cat'> }) {
@@ -31,25 +34,35 @@ function Outfit({ actor }: { actor: Exclude<StoryActorId, 'cat'> }) {
 }
 
 /** Feet anchored at x/y. The child palette matches the original simple rig. */
-export function RooPuppet({ id = 'roo-1', x, y, scale = 1, time = 0, pose = 'idle', expression = 'happy', mouth = 'X', reducedMotion = false, rotation = 0, flip = false, actor, shadow = true }: {
+export function RooPuppet({ id = 'roo-1', x, y, scale = 1, time = 0, pose = 'idle', expression = 'happy', mouth = 'X', mouthProgress = 0.5, reducedMotion = false, rotation = 0, flip = false, actor, shadow = true, squashX = 1, squashY = 1 }: {
   id?: string; x: number; y: number; scale?: number; time?: number; pose?: Pose; expression?: Expression;
-  mouth?: MouthShape; reducedMotion?: boolean; rotation?: number; flip?: boolean; actor?: Exclude<StoryActorId, 'cat'>; shadow?: boolean;
+  mouth?: MouthShape; mouthProgress?: number; reducedMotion?: boolean; rotation?: number; flip?: boolean; actor?: Exclude<StoryActorId, 'cat'>; shadow?: boolean; squashX?: number; squashY?: number;
 }) {
   const index = Math.max(0, Number(id.split('-')[1] ?? 1) - 1);
   const phase = time * Math.PI * 2.5 + index * 0.6;
-  const bounce = reducedMotion ? 0 : pose === 'bounce' ? -Math.abs(Math.sin(phase)) * 52 : pose === 'moonwalk' ? Math.sin(phase) * 4 : Math.sin(time * 1.4 + index) * 2;
-  const tilt = reducedMotion ? 0 : pose === 'bounce' ? Math.sin(phase) * 4 : pose === 'moonwalk' ? -9 : 0;
-  const leftArm = pose === 'leap' || pose === 'surprised' ? 100 : pose === 'carry' ? -20 : 0;
-  const rightArm = pose === 'leap' || pose === 'surprised' ? -105 : pose === 'phone' ? -115 : pose === 'point' ? -92 : pose === 'wave' ? -120 + (reducedMotion ? 0 : Math.sin(time * 5) * 14) : pose === 'carry' ? 20 : 0;
+  const sinPhase = Math.sin(phase);
+  const absSin = Math.abs(sinPhase);
+  const bounce = reducedMotion ? 0 : pose === 'bounce' ? -absSin * 54 : pose === 'moonwalk' ? sinPhase * 4 : Math.sin(time * 1.6 + index) * 2.5;
+  const bounceSquashY = reducedMotion ? 1 : pose === 'bounce' ? (absSin < 0.22 ? 0.92 + (absSin / 0.22) * 0.08 : 1 + (absSin - 0.22) * 0.065) : 1 + Math.sin(time * 1.6 + index) * 0.012;
+  const bounceSquashX = reducedMotion ? 1 : 2 - bounceSquashY;
+  const finalSquashX = squashX * bounceSquashX;
+  const finalSquashY = squashY * bounceSquashY;
+  const tilt = reducedMotion ? 0 : pose === 'bounce' ? sinPhase * 4.5 : pose === 'moonwalk' ? -9 : Math.sin(time * 0.9 + index) * 0.8;
+  const tailSwing = reducedMotion ? 0 : pose === 'bounce' ? Math.cos(phase - 0.5) * 11 : pose === 'leap' ? -18 : Math.sin(time * 2 + index) * 4;
+  const earLag = reducedMotion ? 0 : pose === 'bounce' ? Math.cos(phase - 0.35) * 6 : pose === 'leap' ? -12 : Math.sin(time * 1.8 + index) * 2;
+  const leftArm = pose === 'leap' || pose === 'surprised' ? 100 : pose === 'carry' ? -20 : pose === 'bounce' && !reducedMotion ? -15 - absSin * 22 : 0;
+  const rightArm = pose === 'leap' || pose === 'surprised' ? -105 : pose === 'phone' ? -115 : pose === 'point' ? -92 : pose === 'wave' ? -120 + (reducedMotion ? 0 : Math.sin(time * 5) * 14) : pose === 'carry' ? 20 : pose === 'bounce' && !reducedMotion ? 15 + absSin * 22 : 0;
   const coat = actor === 'dad' ? '#ad7d59' : actor === 'mum' ? '#bb8c6e' : actor ? '#bda082' : COATS[index % COATS.length];
   const sleeves = actor ? CLOTHES[actor] : coat;
   const paleSleeves = actor === 'doctor' || actor === 'dentist' || actor === 'vet';
   const sleeping = expression === 'sleepy' || pose === 'sleep';
   const blink = sleeping || (!reducedMotion && (time + index * 0.47) % 4.2 > 4.04);
+  const shadowScale = reducedMotion ? 1 : Math.max(0.55, 1 + bounce / 130);
+  const shadowOpacity = reducedMotion ? 0.12 : Math.max(0.05, 0.14 + bounce / 600);
   return <g transform={`translate(${x} ${y}) scale(${flip ? -scale : scale} ${scale}) rotate(${rotation})`} data-story-character={actor ?? id}>
-    {shadow ? <ellipse cx="15" cy="2" rx="96" ry="14" fill="#596b51" opacity="0.12" /> : null}
-    <g transform={`translate(0 ${-155 + bounce}) rotate(${tilt})`}>
-      <path d="M43 73 C107 84 109 145 165 147 C125 166 62 149 21 119Z" fill={coat} />
+    {shadow ? <ellipse cx="15" cy="2" rx={96 * shadowScale} ry={14 * shadowScale} fill="#596b51" opacity={shadowOpacity} /> : null}
+    <g transform={`translate(0 ${-155 + bounce}) rotate(${tilt}) scale(${finalSquashX} ${finalSquashY})`}>
+      <path d="M43 73 C107 84 109 145 165 147 C125 166 62 149 21 119Z" fill={coat} transform={`rotate(${tailSwing} 43 95)`} />
       <ellipse cx="-46" cy="144" rx="61" ry="19" fill={coat} transform="rotate(-6 -46 144)" /><ellipse cx="46" cy="145" rx="60" ry="18" fill={coat} transform="rotate(7 46 145)" />
       <path d="M-53-38 C-98 20-87 109-40 132 Q0 156 45 129 C91 93 84 14 51-38Z" fill={coat} />
       <ellipse cy="65" rx="43" ry="64" fill="#efd0ac" /><path d="M-33 67 Q0 85 34 67 Q31 106 0 111 Q-29 105-33 67Z" fill="#e5b58b" />
@@ -57,13 +70,13 @@ export function RooPuppet({ id = 'roo-1', x, y, scale = 1, time = 0, pose = 'idl
       <g transform={`rotate(${leftArm} -51 -5)`}>{paleSleeves ? <path d="M-51-5 Q-88 15-87 52" fill="none" stroke="#bfd0c2" strokeWidth="31" strokeLinecap="round" /> : null}<path d="M-51-5 Q-88 15-87 52" fill="none" stroke={sleeves} strokeWidth="27" strokeLinecap="round" /><ellipse cx="-86" cy="56" rx="14" ry="20" fill={coat} transform="rotate(18 -86 56)" /></g>
       <g transform={`rotate(${rightArm} 54 -7)`}>{paleSleeves ? <path d="M54-7 Q91 5 99 50" fill="none" stroke="#bfd0c2" strokeWidth="31" strokeLinecap="round" /> : null}<path d="M54-7 Q91 5 99 50" fill="none" stroke={sleeves} strokeWidth="27" strokeLinecap="round" /><ellipse cx="97" cy="53" rx="14" ry="20" fill={coat} transform="rotate(-18 97 53)" /></g>
       <g transform="translate(0 -79)">
-        <path d="M-40-58 C-88-124-83-207-58-177 Q-21-133-17-66Z" fill={coat} /><path d="M-39-82 C-66-128-70-169-59-153 Q-38-123-29-83Z" fill="#e9b7a3" />
-        <path d="M20-64 C19-140 55-201 64-172 Q78-108 44-57Z" fill={coat} /><path d="M31-84 C32-127 53-169 54-147 Q57-112 41-79Z" fill="#e9b7a3" />
+        <g transform={`rotate(${-earLag} -30 -60)`}><path d="M-40-58 C-88-124-83-207-58-177 Q-21-133-17-66Z" fill={coat} /><path d="M-39-82 C-66-128-70-169-59-153 Q-38-123-29-83Z" fill="#e9b7a3" /></g>
+        <g transform={`rotate(${earLag} 30 -60)`}><path d="M20-64 C19-140 55-201 64-172 Q78-108 44-57Z" fill={coat} /><path d="M31-84 C32-127 53-169 54-147 Q57-112 41-79Z" fill="#e9b7a3" /></g>
         <path d="M-64-44 C-58-100 59-108 66-44 Q80 16 33 39 Q0 57-41 33 Q-78 15-64-44Z" fill={coat} />
         <ellipse cy="8" rx="49" ry="35" fill="#f3d7b5" /><ellipse cx="-42" cy="2" rx="12" ry="7" fill="#d98c77" opacity="0.45" /><ellipse cx="42" cy="2" rx="12" ry="7" fill="#d98c77" opacity="0.45" />
         {blink ? <g stroke="#493c32" strokeWidth="5" fill="none" strokeLinecap="round"><path d="M-38-24 Q-29-18-20-24" /><path d="M20-24 Q29-18 38-24" /></g> : <g><ellipse cx="-29" cy="-26" rx="6.5" ry={expression === 'surprised' ? 12 : 10} fill="#493c32" /><ellipse cx="29" cy="-26" rx="6.5" ry={expression === 'surprised' ? 12 : 10} fill="#493c32" /><circle cx="-27" cy="-29" r="2" fill="#fff" /><circle cx="31" cy="-29" r="2" fill="#fff" /></g>}
         {expression === 'surprised' || expression === 'thoughtful' ? <g fill="none" stroke="#77563d" strokeWidth="5" strokeLinecap="round"><path d="M-42-47 Q-28-57-16-48" /><path d="M17-48 Q30-57 43-47" /></g> : null}
-        <path d="M-10 4 Q0-3 10 4 Q9 15 0 16 Q-9 14-10 4Z" fill="#704331" /><Mouth shape={mouth} expression={expression} />
+        <path d="M-10 4 Q0-3 10 4 Q9 15 0 16 Q-9 14-10 4Z" fill="#704331" /><Mouth shape={mouth} expression={expression} progress={mouthProgress} />
         <path d="M-18-77 Q-2-94 16-80" fill="none" stroke={coat} strokeWidth="13" strokeLinecap="round" />
         {actor === 'dad' ? <g fill="none" stroke="#526c65" strokeWidth="4"><rect x="-48" y="-42" width="39" height="33" rx="12" /><rect x="9" y="-42" width="39" height="33" rx="12" /><path d="M-9-27 Q0-32 9-27 M-48-29 L-61-35 M48-29 L61-35" /></g> : null}
         {actor === 'doctor' || actor === 'dentist' ? <g><path d="M-62-63 Q0-86 62-63" fill="none" stroke="#9eaea4" strokeWidth="9" /><circle cx="22" cy="-74" r="20" fill="#dbe3de" stroke="#8faaa1" strokeWidth="4" /><circle cx="22" cy="-74" r="8" fill="#a8c0b5" /></g> : null}

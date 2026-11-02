@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import os from 'node:os';
 import path from 'node:path';
 import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
@@ -12,13 +13,31 @@ export type RenderOptions = {
   diagnostic?: boolean;
   durationSec?: number;
   browserExecutable?: string;
+  concurrency?: number;
 };
+
+let cachedServeUrlPromise: Promise<string> | undefined;
+
+function getBundledServeUrl() {
+  if (!cachedServeUrlPromise) {
+    cachedServeUrlPromise = bundle({ entryPoint: path.resolve('renderer/index.ts') }).catch((err) => {
+      cachedServeUrlPromise = undefined;
+      throw err;
+    });
+  }
+  return cachedServeUrlPromise;
+}
 
 function installedWindowsBrowser() {
   if (process.platform !== 'win32') return undefined;
   const roots = [process.env.PROGRAMFILES, process.env['PROGRAMFILES(X86)'], process.env.LOCALAPPDATA].filter((root): root is string => Boolean(root));
   const candidates = roots.flatMap(root => [path.join(root, 'Google', 'Chrome', 'Application', 'chrome.exe'), path.join(root, 'Microsoft', 'Edge', 'Application', 'msedge.exe')]);
   return candidates.find(candidate => existsSync(candidate));
+}
+
+function defaultConcurrency() {
+  const cores = typeof os.availableParallelism === 'function' ? os.availableParallelism() : os.cpus().length;
+  return Math.max(1, Math.min(4, Math.floor(cores / 2)));
 }
 
 /** Runs a single CPU render. Keep this adapter outside the HTTP request layer. */
@@ -38,9 +57,10 @@ export async function renderEpisode(projectInput: EpisodeProject, outputPath: st
   }
   const outputLocation = path.resolve(outputPath);
   await mkdir(path.dirname(outputLocation), { recursive: true });
-  const serveUrl = await bundle({ entryPoint: path.resolve('renderer/index.ts') });
+  const serveUrl = await getBundledServeUrl();
   const inputProps = { project, baseUrl: options.baseUrl ?? 'http://127.0.0.1:4310', diagnostic, durationSec };
   const browserExecutable = options.browserExecutable ?? process.env.REMOTION_BROWSER_EXECUTABLE ?? installedWindowsBrowser();
+  const concurrency = options.concurrency ?? defaultConcurrency();
   const composition = await selectComposition({ serveUrl, id: 'InteractiveStudio', inputProps, browserExecutable, logLevel: 'error' });
   await renderMedia({
     composition,
@@ -52,7 +72,7 @@ export async function renderEpisode(projectInput: EpisodeProject, outputPath: st
     outputLocation,
     inputProps,
     browserExecutable,
-    concurrency: 1,
+    concurrency,
     scale: diagnostic ? 0.5 : 1,
     crf: diagnostic ? 26 : 18,
     overwrite: true,

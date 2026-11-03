@@ -17,3 +17,5 @@ Checked locally on Windows, 2 November 2026.
 Local render artifacts are in `data/exports/` and ignored by Git. The test-tone render uses synthetic QA material; it does not represent a production episode or a user content approval. Test fixtures did not import audio into or approve the sample episode.
 
 The real singing proof remains open: approved master/vocals and words, reviewed mouth cues, deliberate departure animation, visual/audio review, and repeatability against that recording. Hosted accounts, billing and cloud workers have not been implemented or deployed.
+
+For the subsequent Option B 2.5D Illustrated Picture-Book 30-second Story verification, 10-shot cinematic breakdown, and 13 QA stills, see [Story Verification](STORY_VERIFICATION.md).

@@ -48,3 +48,4 @@ export const IllustratedCat = memo(function IllustratedCat({
     </g>
   );
 });
+

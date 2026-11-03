@@ -89,6 +89,7 @@ export function RooPuppet({ id = 'roo-1', x, y, scale = 1, time = 0, pose = 'idl
     return <IllustratedDoctor x={x} y={y} scale={scale} time={time} pose={pose} expression={expression} mouth={mouth} mouthProgress={mouthProgress} reducedMotion={reducedMotion} rotation={rotation} flip={flip} shadow={shadow} squashX={squashX} squashY={squashY} />;
   }
 
+  const role: string | undefined = actor;
   const index = Math.max(0, Number(id.split('-')[1] ?? 1) - 1);
   const phase = time * Math.PI * 2.5 + index * 0.6;
   const sinPhase = Math.sin(phase);
@@ -103,13 +104,13 @@ export function RooPuppet({ id = 'roo-1', x, y, scale = 1, time = 0, pose = 'idl
   const earLag = reducedMotion ? 0 : pose === 'bounce' ? Math.cos(phase - 0.35) * 6 : pose === 'leap' ? -12 : Math.sin(time * 1.8 + index) * 2;
   const leftArm = pose === 'leap' || pose === 'surprised' ? 142 : pose === 'carry' ? -20 : pose === 'bounce' && !reducedMotion ? -12 - absSin * 18 : 0;
   const rightArm = pose === 'leap' || pose === 'surprised' ? -142 : pose === 'phone' ? -115 : pose === 'point' ? -106 : pose === 'wave' ? -130 + (reducedMotion ? 0 : Math.sin(time * 5) * 14) : pose === 'carry' ? 20 : pose === 'bounce' && !reducedMotion ? 12 + absSin * 18 : 0;
-  const coat = actor === 'dad' ? 'url(#dadFurGrad)' : actor === 'doctor' ? 'url(#docFurGrad)' : actor === 'mum' ? '#bb8c6e' : actor ? '#bda082' : COATS[index % COATS.length];
+  const coat = role === 'dad' ? 'url(#dadFurGrad)' : role === 'doctor' ? 'url(#docFurGrad)' : role === 'mum' ? '#bb8c6e' : role ? '#bda082' : COATS[index % COATS.length];
   
   // Sleeves & cuffs
-  const pj = !actor ? ROO_PAJAMAS[index % ROO_PAJAMAS.length] : null;
-  const sleeves = actor === 'dad' ? 'url(#dadCardiganGrad)' : actor === 'doctor' ? 'url(#docCoatGrad)' : actor ? CLOTHES[actor] : pj ? pj.sleeve : coat;
-  const cuffColor = actor === 'dad' ? '#527c75' : pj ? pj.cuff : 'rgba(255,255,255,0.4)';
-  const paleSleeves = actor === 'doctor' || actor === 'dentist' || actor === 'vet';
+  const pj = !role ? ROO_PAJAMAS[index % ROO_PAJAMAS.length] : null;
+  const sleeves = role === 'dad' ? 'url(#dadCardiganGrad)' : role === 'doctor' ? 'url(#docCoatGrad)' : actor ? CLOTHES[actor] : pj ? pj.sleeve : coat;
+  const cuffColor = role === 'dad' ? '#527c75' : pj ? pj.cuff : 'rgba(255,255,255,0.4)';
+  const paleSleeves = role === 'doctor' || role === 'dentist' || role === 'vet';
   
   const sleeping = expression === 'sleepy' || pose === 'sleep';
   const blink = sleeping || (!reducedMotion && (time + index * 0.47) % 4.2 > 4.04);
@@ -264,7 +265,7 @@ export function RooPuppet({ id = 'roo-1', x, y, scale = 1, time = 0, pose = 'idl
         <path d="M-18-77 Q-2-94 16-80" fill="none" stroke={coat} strokeWidth="13" strokeLinecap="round" />
 
         {/* Dad's Glasses */}
-        {actor === 'dad' ? (
+        {role === 'dad' ? (
           <g fill="none" stroke="#3d5852" strokeWidth="4.5">
             <rect x="-48" y="-42" width="39" height="33" rx="12" />
             <rect x="9" y="-42" width="39" height="33" rx="12" />
@@ -273,7 +274,7 @@ export function RooPuppet({ id = 'roo-1', x, y, scale = 1, time = 0, pose = 'idl
         ) : null}
 
         {/* Medical Head Mirror */}
-        {actor === 'doctor' || actor === 'dentist' ? (
+        {role === 'doctor' || role === 'dentist' ? (
           <g>
             <path d="M-62-63 Q0-86 62-63" fill="none" stroke="#9eaea4" strokeWidth="9" />
             <circle cx="22" cy="-74" r="20" fill="#dbe3de" stroke="#8faaa1" strokeWidth="4" />

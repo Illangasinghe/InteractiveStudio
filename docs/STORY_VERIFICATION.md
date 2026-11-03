@@ -1,20 +1,46 @@
 # Story iteration verification
 
-Checked locally on Windows, 2 November 2026.
+Checked locally on Windows, November 2026.
 
-- `npm test`: 25 passed, none failed or skipped. New checks cover story/cast validity, camera bounds and deterministic seeking, Three.js perspective/parallax and analytic spring motion, and reduced motion.
-- `npm run build` and TypeScript checks passed. `npm audit --audit-level=high` reported zero vulnerabilities.
-- Browser loaded the separate ten-shot story project. The doctor reply shot selected `speaker=doctor`, `framing=close`, and `environment=clinic-day`; no captured console errors or warnings.
-- Shot frames and jump approach/contact frames were inspected before rendering. A final contact sheet was checked after the scale-continuity and sleeve-outline refinements. Wide count shots show five and four children on the bed; adults are outside that count.
-- The story MP4 is H.264, 960×540, 30 fps, 900 frames, 30.000 seconds, plus AAC 48 kHz stereo audio lasting 30.016 seconds. Signal analysis measured mean −19.4 dB and maximum −4.0 dB. The manifest records project revision 1, the project hash and the derived soundtrack hash.
-- The separate six-second Three.js study rendered at 1280×720, 30 fps. Four study frames were inspected. It projects a flat character and perspective bed into SVG; no WebGL or complete 3D rig is claimed.
+## 1. Option B Illustrated 2.5D Verification
 
-The earlier lip-sync pilot, full MP3, both WAV stems and all six supplied verses remain preserved. The story project uses a lossless 0–30-second WAV excerpt. Word/phrase timing came from local CPU transcription plus measured pauses and includes editorial choices. All shot timing, content and rights approvals remain unconfirmed; this is an animation draft, not a release approval or a completed full-song animation.
+- **Automated Test Suite**: `npm test`: 25 passed, 0 failed, 0 skipped. All story schema, camera bounds, Rhubarb lip-sync conversion, Three.js projection, and audio timing tests pass deterministically.
+- **Illustrated Character Rigs**:
+  - `IllustratedJoey`: 5 colorways verified on the bed (`x = 580..1200, y = 788`), with long macropod feet grounded on mattress, heavy tripod tail at pelvic base, dynamic bounce and leap flight, blinking eyelids, and phoneme mouth shapes.
+  - `IllustratedDad`: Adult kangaroo father with horn-rimmed glasses and spruce-teal cardigan robe standing by doorway (`x = 1510, y = 930`), verified in idle watch, leap reaction on head, phone call with doctor, and waving.
+  - `IllustratedDoctor`: Pediatric kangaroo doctor in clinic (`x = 985, y = 932`), verified with stethoscope, head mirror, phone call consultation, and singing advice with pointing gesture.
+  - `IllustratedCat`: Ginger tabby kitten on round teal braided rug, verified with de-haloed edges (zero white border sticker artifacts), idle breathing, and startled alert eyes.
+- **Illustrated Widescreen Sets**:
+  - `StoryBedroomSet`: 1920×1080 watercolor bedroom with peach curtains, morning sun, rolling hills, wooden toddler bed with lavender quilt, bookshelf with succulent, and arched mint doorway.
+  - `StoryClinicSet`: 1920×1080 watercolor pediatric clinic with animal eye chart, examination bench with paper roll, and medicine cabinet.
+  - `StoryBedForeground`: Geometric vector rail discarded so watercolor bed frames scene naturally.
 
-Artifacts:
+## 2. Render Artifacts & Stills
 
-- `data/exports/five-little-kangaroos-story-draft.mp4`
-- `data/exports/story-final-qa/contact-sheet.png`
-- `data/exports/three-camera-study/camera-bounce-study.mp4`
+13 Remotion QA stills rendered under `data/exports/story-qa/`:
 
-For the full-song plan, read [STORYBOARD.md](STORYBOARD.md). For camera, motion, Three.js and asset decisions, read [ANIMATION_DIRECTION.md](ANIMATION_DIRECTION.md).
+| Shot | Time | Beat / Action | Verified Feature |
+|---|---|---|---|
+| `shot-01.png` | 1.60 s | `room-establish` | 5 joeys in colorway pajamas seated on bed, Dad watching from door |
+| `shot-02.png` | 5.10 s | `daddy-notices` | Dad looking on with fond expression |
+| `shot-03.png` | 9.32 s | `five-on-the-bed` | 5 kangaroos bouncing in sync with count UI pill "5 ON THE BED" |
+| `shot-04.png` | 12.51 s | `the-big-leap` | Roo 1 crouch anticipation and parabolic takeoff |
+| `shot-05.png` | 14.87 s | `daddy-surprised` | Roo 1 landing on Dad's head, Dad reacting with surprised mouth & eyes |
+| `shot-06.png` | 17.54 s | `the-phone-call` | Dad holding phone to ear calling doctor, Roo 1 standing safely beside him |
+| `shot-07.png` | 19.77 s | `doctor-listens` | Doctor Kangaroo listening on smartphone in pediatric clinic |
+| `shot-08.png` | 22.03 s | `doctor-replies` | Doctor singing advice with lip-sync mouth shape and speech bubble |
+| `shot-09.png` | 24.41 s | `a-gentler-bedtime` | 4 joeys settling back on the bed |
+| `shot-10.png` | 27.79 s | `four-and-a-cat` | 4 joeys bouncing, Dad watching, sleeping cat curled on rug |
+| `shot-11.png` | 13.10 s | `leap-flight` | Apex of flight arc across the bedroom |
+| `shot-12.png` | 13.50 s | `contact-approach` | Roo 1 descending towards Dad |
+| `shot-13.png` | 13.80 s | `contact-landed` | Contact landing and spring damping |
+
+Full Episode Render:
+- `data/exports/five-little-kangaroos-story-draft.mp4`: H.264, 960×540, 30 fps, 900 frames, 30.000 seconds, AAC 48 kHz stereo soundtrack. File size: 6,000,933 bytes.
+
+## 3. Git Provenance
+
+- Code and assets committed and pushed to `main` at commit `d0c56e7`.
+- Pipeline reference: [ILLUSTRATED_2.5D_PIPELINE.md](ILLUSTRATED_2.5D_PIPELINE.md).
+- Animation direction: [ANIMATION_DIRECTION.md](ANIMATION_DIRECTION.md).
+- Storyboard treatment: [STORYBOARD.md](STORYBOARD.md).

@@ -2,7 +2,9 @@
 
 Working editorial plan, 2 November 2026. This document proposes animation against the supplied recording; it does not replace the supplied lyrics or approve the finished episode.
 
-The episode should play as one little family story. Use a consistent bedroom, a recognisable Dad, a distinct doctor, and the same five child kangaroos. Establish the room before the singing starts. Show each described action, then Dad's reaction, then the relevant call and advice. Return to the bedroom with the next verse's exact child count. Dad and visiting adults are supporting cast and must not increase the displayed child count.
+The episode plays as one continuous family story in the Option B warm 2.5D illustrated picture-book aesthetic. Use a consistent watercolor bedroom, a recognisable Dad in glasses and teal robe, a distinct clinic doctor in a lab coat, and the five child kangaroos in their distinct pastel pajamas (peach, blue, warm mustard, mint, lavender). Establish the room before singing starts. Show each described action, then Dad's reaction, then the relevant call and advice. Return to the bedroom with the next verse's exact child count. Dad and visiting adults are supporting cast and must not increase the displayed child count.
+
+All 5 child kangaroos are staged directly on the wooden toddler bed's patchwork quilt (`x = 580..1200, y = 788`) with grounded macropod feet and tripod tails. Dad stands attentively by the arched doorway (`x = 1510, y = 930`), and the sleeping ginger kitten rests peacefully on the teal braided rug (`x = 1750, y = 933`).
 
 Use gentle physical comedy. A child landing on Dad's head is a soft, brief surprise with an immediate reassuring reaction. Keep the cat, nose bump and broken fan scenes non-graphic; show a startled character and a safe resolution. The trampoline ending should include adult supervision. These are editorial staging choices, rather than alterations to the supplied recording.
 

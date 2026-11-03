@@ -103,20 +103,22 @@ export function IllustratedJoey({
 
   return (
     <g transform={`translate(${x} ${y}) scale(${flip ? -scale : scale} ${scale}) rotate(${rotation})`} data-story-character={id}>
-      {/* Contact Shadow under feet */}
-      {shadow ? <ellipse cx="15" cy="2" rx={96 * shadowScale} ry={14 * shadowScale} fill="#596b51" opacity={shadowOpacity} /> : null}
+      {/* Contact Shadow under feet and tail */}
+      {shadow ? <ellipse cx="10" cy="2" rx={110 * shadowScale} ry={16 * shadowScale} fill="#596b51" opacity={shadowOpacity} /> : null}
 
       {/* Main Body Rig with Squash & Bounce */}
-      <g transform={`translate(0 ${-145 + bounce}) rotate(${tilt}) scale(${finalSquashX * 0.82} ${finalSquashY * 0.82})`}>
-        {/* 1. Tail (Layer 1: Behind body) */}
-        <g transform={`translate(-40 100) rotate(${tailSwing} 70 30)`}>
-          <image href={tailDataUri} width="200" height="200" x="-135" y="-15" />
+      <g transform={`translate(0 ${-188 + bounce}) rotate(${tilt}) scale(${finalSquashX * 0.82} ${finalSquashY * 0.82})`}>
+        {/* 1. Tail (Layer 1: Behind body, anchored at hip, sweeping onto the bed) */}
+        <g transform={`translate(-68 95) rotate(${tailSwing} 10 10)`}>
+          <image href={tailDataUri} width="220" height="220" x="-180" y="-35" />
         </g>
 
-        {/* 2. Hind Feet (Layer 2: Grounded under leg cuffs) */}
-        <g transform="translate(-10 0)">
-          <image href={footLeftDataUri} width="112" height="94" x="-75" y="90" />
-          <image href={footRightDataUri} width="132" height="81" x="15" y="96" />
+        {/* 2. Hind Feet (Layer 2: Long macropod kangaroo feet grounded under leg cuffs) */}
+        <g>
+          {/* Near foot (3/4 angle) */}
+          <image href={footLeftDataUri} width="122" height="102" x="-68" y="142" />
+          {/* Far foot (extending horizontally forward) */}
+          <image href={footRightDataUri} width="154" height="94" x="28" y="136" />
         </g>
 
         {/* 3. Torso (Layer 3: Pajamas with 5 distinct colorways and star pattern) */}
@@ -134,9 +136,9 @@ export function IllustratedJoey({
           <image href={armRightUri} width="110" height="159" x="-42" y="-12" />
         </g>
 
-        {/* 6. Head with Ears and Face */}
-        <g transform="translate(0 -160)">
-          <image href={headDataUri} width="200" height="245" x="-100" y="-150" />
+        {/* 6. Head with Ears, Muzzle, and Expressive Face */}
+        <g transform="translate(0 -178)">
+          <image href={headDataUri} width="200" height="254" x="-100" y="-155" />
 
           {/* Expressive Eyelids for Blinking / Sleep */}
           {blink ? (

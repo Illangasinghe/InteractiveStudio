@@ -15,28 +15,19 @@ type Pose = 'idle' | 'bounce' | 'leap' | 'wave' | 'surprised' | 'phone' | 'point
 type Expression = 'happy' | 'surprised' | 'sleepy' | 'thoughtful';
 
 function Mouth({ shape, expression, progress = 0.5 }: { shape: MouthShape; expression: Expression; progress?: number }) {
-  if (expression === 'surprised') {
-    return (
-      <g transform="translate(0 23)">
-        <ellipse cy="0" rx="9" ry="12" fill="#5c261e" stroke="#421a14" strokeWidth="1.5" />
-        <ellipse cy="5" rx="6" ry="4" fill="#df7872" />
-      </g>
-    );
-  }
   if (shape === 'X' || shape === 'A') {
     // Closed resting mouth: natural illustrated smile shows cleanly
     return null;
   }
   const openEnvelope = 0.72 + 0.28 * Math.sin(Math.max(0, Math.min(1, progress)) * Math.PI);
-  const baseHeight = shape === 'D' || shape === 'E' ? 13 : shape === 'B' ? 6 : 9;
-  const baseWidth = shape === 'F' || shape === 'H' ? 8 : 12;
-  const height = Math.max(3.5, baseHeight * openEnvelope);
-  const width = Math.max(6, baseWidth * (0.85 + 0.15 * openEnvelope));
+  const baseHeight = shape === 'D' || shape === 'E' ? 9 : shape === 'B' ? 4 : 6;
+  const baseWidth = shape === 'F' || shape === 'H' ? 6 : 9;
+  const height = Math.max(2.5, baseHeight * openEnvelope);
+  const width = Math.max(4, baseWidth * (0.85 + 0.15 * openEnvelope));
   return (
-    <g transform="translate(0 23)">
-      <ellipse cy="0" rx={width} ry={height} fill="#5c261e" />
-      {height > 6 ? <ellipse cy={height * 0.4} rx={width * 0.65} ry={height * 0.35} fill="#df7872" /> : null}
-      {shape === 'B' || shape === 'G' ? <path d={`M${-width + 2} -2 H${width - 2}`} stroke="#fff9ee" strokeWidth="2.5" strokeLinecap="round" /> : null}
+    <g transform="translate(0 22)" opacity={0.85}>
+      <ellipse cy="0" rx={width} ry={height} fill="#753c30" />
+      {height > 4 ? <ellipse cy={height * 0.35} rx={width * 0.6} ry={height * 0.3} fill="#e59892" /> : null}
     </g>
   );
 }

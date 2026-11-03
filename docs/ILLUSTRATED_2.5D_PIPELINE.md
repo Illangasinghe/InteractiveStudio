@@ -48,8 +48,10 @@ All processed assets are converted to Base64 strings and exported as TypeScript 
 |---|---|---|---|
 | `storybook_bedroom_bg.jpg` | `storyAssets.ts` | `storybookBedroomDataUri` | 1920×1080 Widescreen Bedroom Background |
 | `storybook_clinic_bg.jpg` | `storyAssets.ts` | `storybookClinicDataUri` | 1920×1080 Widescreen Clinic Background |
-| `daddy_kangaroo.png` | `storyAssets.ts` | `daddyKangarooDataUri` | Full-body adult kangaroo father |
-| `doctor_kangaroo.png` | `storyAssets.ts` | `doctorKangarooDataUri` | Full-body kangaroo doctor |
+| `daddy_kangaroo.png` | `storyAssets.ts` | `daddyKangarooDataUri` | Full-body standing kangaroo father |
+| `daddy_kangaroo_phone.png` | `storyAssets.ts` | `daddyKangarooPhoneDataUri` | Full-body Daddy holding telephone receiver to ear |
+| `doctor_kangaroo.png` | `storyAssets.ts` | `doctorKangarooDataUri` | Kangaroo doctor holding phone in clinic |
+| `doctor_kangaroo_advice.png` | `storyAssets.ts` | `doctorKangarooAdviceDataUri` | Kangaroo doctor wagging finger in gentle advice |
 | `sleeping_cat.png` | `storyAssets.ts` | `sleepingCatDataUri` | Curled sleeping kitten on braided rug |
 | `joey/head.png` | `joeyAssets.ts` | `headDataUri` | Baby kangaroo head & ears |
 | `joey/tail.png` | `joeyAssets.ts` | `tailDataUri` | Baby kangaroo tripod tail |
@@ -71,22 +73,18 @@ Layer stack inside the root `<g>` transform:
 3. **Layer 2 (Hind Feet)**: Macropod horizontal feet placed at `y = 136..142`, grounded under pajama leg cuffs.
 4. **Layer 3 (Torso)**: Pajama body with distinct colorway patterns and star prints.
 5. **Layer 4 (Limbs)**: Left and right arms with shoulder pivots `(-42, -72)` and `(38, -72)`, supporting bounce arm-flaps, leaps, and waves.
-6. **Layer 5 (Head & Face)**: Head graphic with dynamic blinking eyelids and phoneme mouth shapes (`A` through `H`) aligned over the illustrated snout.
+6. **Layer 5 (Head & Face)**: Head graphic with soft mouth opacity during singing phonemes; natural illustrated closed mouth used during resting states without crude dark vector ellipses.
 
 ### 4.2 IllustratedDad Rigging (`IllustratedDad.tsx`)
 
-1. **Base Pose**: Stands by bedroom door (`x = 1510, y = 930`).
-2. **Leap Reaction**: Reacts with squash-and-stretch when a joey leaps and lands on his head.
-3. **Phone Pose**: Displays dark teal smartphone and raised paw held up to ear (`translate(30, -362)`).
-4. **Waving Pose**: Waving arm animation during family finale.
-5. **Lip-Sync**: Expressive mouth phonemes overlaying muzzle during sung lines.
+1. **Standing Pose**: Stands by bedroom door (`x = 1600, y = 930`). Round spectacles and eyes are organically painted in watercolor—no synthetic vector pupil dots or glasses wireframes overlay the face.
+2. **Phone Consultation**: Switches to `daddyKangarooPhoneDataUri` when calling the doctor (`pose === 'phone'`). His arm and paw naturally hold a vintage telephone receiver to his ear, with caring, worried eyebrows behind his spectacles—eliminating the pasted-on vector smartphone box.
+3. **Natural Lip-Sync & Acting**: Subtle head nod (`talkBob = Math.sin(time * 12) * 1.8`) when speaking into the phone.
 
 ### 4.3 IllustratedDoctor Rigging (`IllustratedDoctor.tsx`)
 
-1. **Base Pose**: Stands in pediatric clinic (`x = 985, y = 932`).
-2. **Phone Consultation**: Holds phone to ear during dialogue exchange with Dad.
-3. **Advisory Gesture**: Animated wagging pointing paw (`(82, -214)`) when singing *"No more kangaroos jumping on the bed!"*.
-4. **Singing Lip-Sync**: Phoneme overlays for dialogue delivery.
+1. **Clinic Call (`pose === 'phone'`)**: Renders `doctorKangarooDataUri` listening on the clinic telephone.
+2. **Advisory Stance (`pose === 'point'`)**: Switches seamlessly to `doctorKangarooAdviceDataUri` when singing *"No more kangaroos jumping on the bed!"*. Doctor Kangaroo stands with one hand in his coat pocket and the other paw gently wagging an index finger with a natural sway (`adviceWag`). Vector stick arms and cartoon dialogue boxes are completely eliminated.
 
 ### 4.4 IllustratedCat Rigging (`IllustratedCat.tsx`)
 
@@ -97,7 +95,9 @@ Layer stack inside the root `<g>` transform:
 
 ## 5. Sets & Staging Alignment
 
-1. **Bed Group Coordinates**:
+1. **Bed Group Coordinates**: 5 joeys positioned across the mattress quilt (`x = 580..1200, y = 788`).
+2. **Leap & Floor Landing**: The featured joey leaps off the bed in a continuous parabolic flight arc, landing cleanly onto the braided floor rug at `x = 1360, y = 925` beside the foot of the bed. This avoids flying through Daddy Kangaroo (`x = 1600`), giving clear theatrical separation.
+3. **Doctor Clinic**: Doctor stands centered in the examination room (`x = 985, y = 932`) with full medical background cabinetry and window garden views.
    $$\text{bedX}(i) = 580 + (i - 1) \times 155 \quad \text{for } i \in [1, 5]$$
    Places the five kangaroos between $x = 580$ and $x = 1200$ directly atop the illustrated toddler bed's mattress and purple quilt at $y = 788$.
 2. **Leap Trajectory**:
@@ -107,3 +107,4 @@ Layer stack inside the root `<g>` transform:
    \text{rot}(p) &= -18^\circ + 27^\circ \times p
    \end{aligned}$$
    Creates a smooth parabolic arc from the bed onto Daddy Kangaroo's head/shoulders.
+

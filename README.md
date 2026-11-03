@@ -17,13 +17,6 @@ Open http://127.0.0.1:5173. The editor and local API run together; stop them wit
 
 ## What you can do now
 
-- **Option B Warm 2.5D Illustrated Picture-Book Pipeline**: Characters and environments use soft watercolor/storybook aesthetics (*Beatrix Potter* / *Bluey* inspired) with authentic kangaroo anatomy (horizontal macropod feet, thick muscular tripod tail supporting the pelvic base, sloping marsupial neck, large expressive ears, and 5 distinct polka-dot pajama colorways).
-- **Modular SVG/React Puppetry**: Dynamic joint articulation and expressive acting across the cast:
-  - `IllustratedJoey`: 5 individual joeys on the bed quilt with layered limb hierarchy, procedural bouncing arcs, and head tilt.
-  - `IllustratedDad`: Worried glasses, turquoise robe, and right arm holding a smartphone to his ear during the emergency call.
-  - `IllustratedDoctor`: Lavender clinician coat, reflective head mirror, stethoscope, and stern wagging finger during medical admonishment.
-  - `IllustratedCat`: Sleeping ginger tabby on the teal bedroom rug with gentle rhythmic breathing.
-- **Robust Base64 Inlining**: All illustrated textures and puppet parts are pre-cleaned (anti-aliased de-haloing, die-cut sticker rim removal) and inlined as Base64 Data URIs directly in TypeScript ([`joeyAssets.ts`](file:///c:/dev/InteractiveStudio/renderer/story/joeyAssets.ts) and [`storyAssets.ts`](file:///c:/dev/InteractiveStudio/renderer/story/storyAssets.ts)). This guarantees zero latency, deterministic rendering, and avoids CORS or headless file sandboxing issues in Remotion and Vite.
 - Open the illustrated counting demo, scrub/play its animation and edit scenes, motions, captions and visible counts.
 - Create song or story projects, edit their objectives and transcript, undo/redo changes, and save/reopen them.
 - Import a WAV or MP3. The service preserves a content-hashed copy, verifies its duration with FFprobe, scales the initial scene timing to match, and calculates a waveform with FFmpeg. Importing clears sample mouth cues and prior approvals.
@@ -32,15 +25,11 @@ Open http://127.0.0.1:5173. The editor and local API run together; stop them wit
 - Stage supported story moments with Daddy, the doctor and the cat; choose the speaking character, shot framing, bounded camera moves and cut/dissolve transitions. A clinic cutaway and an empty bed validate their own cast/count state. Shot timing reviews reset when the shot changes.
 - Record source and rights notes, review the content, then request a CPU-rendered 1080p MP4. Export is blocked while required preflight checks fail.
 
-The source-code demo contains original vector artwork and manually authored example mouth cues. **The reusable demo does not bundle a licensed recording or verified lip-sync.** The private local Five Little Kangaroos pilot preserves the supplied MP3, both WAV stems and lyrics under the ignored `data/` folder. Its first 30 seconds have generated vocal-stem mouth-cue suggestions and a diagnostic MP4. See [the pilot notes](docs/SONG_PILOT.md).
+The source-code demo contains original vector artwork and manually authored example mouth cues. **The reusable demo does not bundle a licensed recording or verified lip-sync.** The private local Five Little Kangaroos pilot now preserves the supplied MP3, both WAV stems and lyrics under the ignored `data/` folder. Its first 30 seconds have generated vocal-stem mouth-cue suggestions and a diagnostic MP4. The full countdown storyboard and singing alignment still require timing review. See [the pilot notes](docs/SONG_PILOT.md).
 
 Local song preparation is available through `npm run import:song`, `npm run import:stem` and `npm run lipsync`. Rhubarb can be on `PATH`, supplied through `RHUBARB_PATH`, or unpacked into `.tools/rhubarb/Rhubarb-Lip-Sync-1.14.0-Windows/`. Original source files are copied without changing their bytes. Imported vocals are used for analysis; the master mix remains the soundtrack.
 
-The **Five Little Kangaroos · Story draft** project is a complete 30-second excerpt with ten cinematic shots: bedroom establishing, five-child count, continuous leap/landing, Daddy's phone call, doctor cutaway, and the subsequent four-child count. It renders using the Option B 2.5D illustrated rigs and watercolor environments:
-- [Illustrated 2.5D Pipeline Specification](docs/ILLUSTRATED_2.5D_PIPELINE.md)
-- [Animation Direction & Anatomy Standards](docs/ANIMATION_DIRECTION.md)
-- [Story Verification & QA Stills](docs/STORY_VERIFICATION.md)
-- [Storyboard & Shot Staging](docs/STORYBOARD.md)
+The newer **Five Little Kangaroos · Story draft** project is a separate 30-second excerpt with ten shots: a room setup, five-child count, continuous leap/landing, Daddy's phone call, a doctor cutaway and the next four-child count. It preserves the earlier pilot and complete original recording. Its machine-assisted shot timing remains draft. See [the storyboard and full-song treatment](docs/STORYBOARD.md) and [the animation direction](docs/ANIMATION_DIRECTION.md).
 
 `npm run study:camera` renders an isolated Three.js perspective/spring study. It uses real Three.js projection with flat artwork and analytic motion; the main song renderer remains SVG. No WebGL or full 3D character rig has been introduced. The study and its tests help evaluate a later depth/prop pipeline before committing to full 3D rendering.
 
@@ -72,13 +61,7 @@ npm run doctor
 npm run render:diagnostic
 ```
 
-The `render:diagnostic` command writes a short silent animation diagnostic to `data/exports/diagnostic.mp4`.
-
-To render the 30-second **Five Little Kangaroos · Story draft** with full audio and Option B 2.5D illustrated puppetry:
-
-```powershell
-npm run render -- --project=data/projects/five-little-kangaroos-story/project.json --diagnostic --duration=30 --base-url=http://127.0.0.1:4310 --output=data/exports/five-little-kangaroos-story-draft.mp4
-```
+The last command writes a short **silent animation diagnostic** to `data/exports/diagnostic.mp4` and a manifest alongside it. It deliberately bypasses episode approvals and carries a visible animation-test label. It verifies rendering infrastructure, not singing quality or release approval.
 
 To render a saved, approved episode while the service is running:
 

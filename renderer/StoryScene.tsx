@@ -14,7 +14,13 @@ const bedX = (id: string) => 580 + (Math.max(1, Number(id.split('-')[1] ?? 1)) -
 function leapPosition(scene: Scene, progress: number) {
   const p = clamp(progress);
   const startX = bedX(scene.story?.featuredCharacterId ?? 'roo-1');
-  return { x: startX + (1510 - startX) * p, y: 788 + (535 - 788) * p - 220 * 4 * p * (1 - p), rotation: -18 + p * 27 };
+  const targetX = 1360;
+  const targetY = 925;
+  return {
+    x: startX + (targetX - startX) * p,
+    y: 788 + (targetY - 788) * p - 200 * 4 * p * (1 - p),
+    rotation: -14 + p * 18,
+  };
 }
 
 const leapFlightProgress = (sceneProgress: number) => clamp((sceneProgress - 0.65) / 0.35) * 0.7;
@@ -53,7 +59,7 @@ export function StoryScene({ project, scene, timeSec, backdropTransform, foregro
   const speaker = speakingActorId ?? 'roo-1';
   const mouthFor = (id: string) => id === speaker ? cue?.value ?? 'X' : 'X';
   const bedGroup = (pose: 'idle' | 'bounce' | 'wave' | 'sleep' | 'moonwalk' = 'idle', excludeFeatured = false) => scene.characterIds.filter(id => !excludeFeatured || id !== featuredCharacterId).map(id => <RooPuppet key={id} id={id} x={bedX(id)} y={788} scale={0.78} time={time} pose={pose} reducedMotion={reducedMotion} mouth={mouthFor(id)} mouthProgress={cueProgress} />);
-  const father = (pose: 'idle' | 'surprised' | 'phone' | 'point' | 'wave' = 'idle', yOffset = 0, squashX = 1, squashY = 1) => actors.has('dad') ? <RooPuppet actor="dad" x={1510} y={930 + yOffset} scale={1.2} time={time} pose={pose} expression={pose === 'surprised' ? 'surprised' : pose === 'phone' ? 'thoughtful' : 'happy'} reducedMotion={reducedMotion} mouth={mouthFor('dad')} mouthProgress={cueProgress} squashX={squashX} squashY={squashY} /> : null;
+  const father = (pose: 'idle' | 'surprised' | 'phone' | 'point' | 'wave' = 'idle', yOffset = 0, squashX = 1, squashY = 1) => actors.has('dad') ? <RooPuppet actor="dad" x={1600} y={930 + yOffset} scale={1.2} time={time} pose={pose} expression={pose === 'surprised' ? 'surprised' : pose === 'phone' ? 'thoughtful' : 'happy'} reducedMotion={reducedMotion} mouth={mouthFor('dad')} mouthProgress={cueProgress} squashX={squashX} squashY={squashY} /> : null;
   const clinicActor = beatId === 'dentist' ? 'dentist' : 'doctor';
   let action;
 
@@ -87,12 +93,12 @@ export function StoryScene({ project, scene, timeSec, backdropTransform, foregro
       break;
     }
     case 'dad-phone':
-      action = <>{bedGroup('idle', true)}{father('phone')}{!scene.characterIds.includes(featuredCharacterId) ? <RooPuppet id={featuredCharacterId} x={1756} y={930} scale={0.64} time={time} pose="idle" reducedMotion={reducedMotion} /> : null}<g><path d="M1338 466 L1421 537" stroke="#fbf5e5" strokeWidth="18" strokeLinecap="round" /><circle cx="1260" cy="403" r="103" fill="#fffaed" stroke="#e3d9c3" strokeWidth="5" /><circle cx="1260" cy="403" r="57" fill="#d8e5d7" /><path d="M1260 372 V434 M1229 403 H1291" stroke="#80a699" strokeWidth="18" strokeLinecap="round" /></g></>;
+      action = <>{bedGroup('idle', true)}{father('phone')}{!scene.characterIds.includes(featuredCharacterId) ? <RooPuppet id={featuredCharacterId} x={1360} y={925} scale={0.68} time={time} pose="idle" reducedMotion={reducedMotion} /> : null}</>;
       break;
     case 'doctor-advice':
     case 'dentist': {
       const adviceMode = beatId === 'dentist' || speaker === clinicActor;
-      action = <>{actors.has(clinicActor) ? <RooPuppet actor={clinicActor} x={985} y={932} scale={1.35} time={time} pose={adviceMode ? 'point' : 'phone'} reducedMotion={reducedMotion} mouth={mouthFor(clinicActor)} mouthProgress={cueProgress} /> : null}{adviceMode ? <><RestIllustration x={1374} y={478} scale={0.86} kind={beatId === 'dentist' ? 'tooth' : 'bed'} /><path d="M1250 591 L1189 630 L1230 554" fill="#fffbef" /></> : null}</>;
+      action = <>{actors.has(clinicActor) ? <RooPuppet actor={clinicActor} x={985} y={932} scale={1.35} time={time} pose={adviceMode ? 'point' : 'phone'} reducedMotion={reducedMotion} mouth={mouthFor(clinicActor)} mouthProgress={cueProgress} /> : null}</>;
       break;
     }
     case 'cat-reaction':

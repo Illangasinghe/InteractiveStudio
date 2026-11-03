@@ -1,88 +1,79 @@
-# Animation direction, Option B illustrated 2.5D pipeline and Three.js feasibility
+# Animation direction and Three.js feasibility
 
-Decision note & implementation architecture · November 2026
+Decision note · 2 November 2026
 
-**InteractiveStudio uses an illustrated 2.5D picture-book production (Option B), with Three.js camera projection as a tested depth option.** This production combines the warm, tactile charm of classic children's picture books (*Beatrix Potter*, *Bluey*) with the modularity, lip-sync, and frame-rate precision of digital animation rigs.
+**Use a story-led 2.5D puppet production for the current song, with Three.js camera projection as a tested option.** Three.js is a useful route to depth, perspective and future 3D props. It does not supply a finished kangaroo rig, acting, scene timing or a storyboard. Those remain the main quality work.
 
----
+## What should improve the actual episode
 
-## 1. Evolution: Flat Vector SVG to Option B 2.5D Illustrated Storybook
+Each verse needs a readable setup, an action, a reaction and a resulting state. Establish the animals on the bed, make the named action understandable, show the response, then confirm the remaining count. The ending needs an empty-bed beat followed by the kangaroos together on the garden trampoline. Keep the supplied lyrics as the editorial reference; review timing against the performed recording.
 
-Initial animation used geometric SVG vectors (stroked circles, pill shapes, and flat color paths). In practice, flat geometric vectors felt stiff, created jarring border outlines, and failed to communicate authentic animal anatomy. 
+Use the camera to direct attention at those beats:
 
-After reviewing three architectural directions:
-1. **Option A (Rigged vector puppet)**: Flat vectors with more joints. (Still suffered from artificial vector outlines and flat aesthetic).
-2. **Option B (Warm illustrated 2.5D characters & sets)**: Richly textured watercolor and colored-pencil illustrations built into modular puppet rigs, composited into painterly widescreen environments. **(Selected & implemented)**.
-3. **Option C (Stylised 3D models)**: Full 3D meshes and rigging in Blender/Three.js. (Deferred until asset proof, due to heavy CPU-rendering benchmarks on standard consumer hardware).
+| Shot | Purpose | Suitable motion |
+| --- | --- | --- |
+| Wide | Establish the room, bed and accurate visible count | Locked or a slow, small push |
+| Medium | Show the acting character and the relevant prop | Gentle push or a short lateral move |
+| Close | Show an expression, a spoken response or a clear reaction | Usually locked |
+| Detail | Show the important object or contact point | Short, deliberate cut; return to context afterwards |
 
----
+Begin each shot from an authored composition. Keep moves bounded, ease them at their ends and avoid continuous drifting. A pan or zoom should reveal a story detail. Count-confirmation shots must keep all counted animals visible. Reduced motion locks the camera and removes bounce/spring movement; it must preserve the same story states.
 
-## 2. Authentic Kangaroo Anatomy & Rigging Rules
+Character improvements should include anticipation before a jump, a coherent flight arc, contact and recovery, a small tail follow-through, eye direction and an appropriate reaction pose. Add a prop only when the action needs it. Repeated idle bouncing alone will not communicate the different verse events.
 
-To look like genuine macropods rather than stumpy cartoon rabbits, all kangaroo characters adhere to core anatomical constraints:
+## 2.5D now, full 3D after an asset proof
 
-1. **Horizontal Macropod Hind Feet**:
-   - Long horizontal hind feet with prominent claws that ground flat on the mattress or floorboards.
-   - Legs emerge from pajama cuffs or trousers with realistic marsupial ankles and foot pads.
-2. **Muscular Tripod Tail**:
-   - Thick, heavy tail anchored at the pelvic base (`(-68, 95)` on joeys), extending behind to form a stable tripod stance and resting naturally on the bed or floor.
-   - Dynamic counter-swing during hops, leaps, and idle breathing.
-3. **Sloping Marsupial Shoulders**:
-   - Organic, sloping neck and shoulder silhouettes with seamless limb pivots (no disjointed circular shoulder sockets).
-4. **Distinct Identity**:
-   - Five distinct pastel bedtime pajama colorways for the five joeys (peach, sky blue, warm mustard, soft mint, and lavender) featuring sweet star patterns, white cuffs, and collar trims.
+The current SVG approach can separate the rear wall, room props, bed, character bodies and foreground details. Placing those layers at different authored depths adds parallax while preserving the existing visual style. Three.js's perspective camera and vector projection provide standard 3D-to-screen calculations; this can project a 2D character billboard alongside a perspective bed or prop. See the official [PerspectiveCamera implementation and API documentation comments](https://raw.githubusercontent.com/mrdoob/three.js/r187/src/cameras/PerspectiveCamera.js) and [Vector3 implementation](https://raw.githubusercontent.com/mrdoob/three.js/r187/src/math/Vector3.js).
 
----
+A full 3D version would require approved character meshes, a skeleton, skinning, facial/mouth shapes, textures and reusable acting clips. It would also need a room and prop pipeline, lighting decisions and render benchmarks. A camera orbit that reveals a flat puppet's side is inappropriate; restrict the current production to shots supported by the artwork.
 
-## 3. Harmonized Cast & Set Architecture
+Three.js can later be used for a limited 3D room or bed while characters remain illustrated. Prove one recognisable 3D prop and one useful shot before replacing the main renderer.
 
-Every character and environment shares the exact same warm, softly textured watercolor and colored-pencil aesthetic:
+## Implemented isolated prototype
 
-| Entity | Component | Visual Design & Features | Animation Capabilities |
-|---|---|---|---|
-| **Child Kangaroos (5 Joeys)** | [`IllustratedJoey`](file:///c:/dev/InteractiveStudio/renderer/story/IllustratedJoey.tsx) | Golden fur, cream muzzle, 5 pajama colorways with star prints, long macropod feet and tripod tail. | Synchronous bounce, crouch anticipation, parabolic leap flight, squash & stretch landing, blinking eyelids, lip-sync mouth phonemes. |
-| **Daddy Kangaroo** | [`IllustratedDad`](file:///c:/dev/InteractiveStudio/renderer/story/IllustratedDad.tsx) | Kind fatherly expression, round horn-rimmed glasses, spruce-teal buttoned cardigan robe, striped pajamas. | Idle watch, surprised reaction when joey leaps on head, smartphone held to ear, advisory pointing, finale waving, lip-sync. |
-| **Doctor Kangaroo** | [`IllustratedDoctor`](file:///c:/dev/InteractiveStudio/renderer/story/IllustratedDoctor.tsx) | Pediatric doctor with forehead reflector mirror, stethoscope, white lab coat with ID badge, mint scrubs. | Phone consultation with Dad, advisory pointing gesture (*"No more kangaroos jumping on the bed!"*), singing lip-sync. |
-| **Cozy Sleeping Cat** | [`IllustratedCat`](file:///c:/dev/InteractiveStudio/renderer/story/IllustratedCat.tsx) | Sweet ginger tabby kitten curled peacefully asleep on a teal braided rug. No sticker borders. | Gentle idle breathing, startled alert eyes and hop during reaction beat. |
-| **Storybook Bedroom Set** | [`StoryBedroomSet`](file:///c:/dev/InteractiveStudio/renderer/story/Sets.tsx) | 1920×1080 widescreen landscape with peach curtains, morning sun, rolling hills, wooden toddler bed, bookshelf, succulent, arched mint doorway, honey wood floors. | Replaces 35+ lines of vector shapes. Joeys sit directly on the quilt (`x = 580..1200, y = 788`). |
-| **Storybook Clinic Set** | [`StoryClinicSet`](file:///c:/dev/InteractiveStudio/renderer/story/Sets.tsx) | 1920×1080 widescreen landscape with animal symbol eye chart, examination bench with paper roll, white glass-door medicine cabinet. | Full environment for doctor dialogue shots. |
+The main song renderer now also has an authored story-shot layer: supporting characters, phone and advice props, a clinic set, an action kangaroo, and an explicitly assigned speaking actor. Its camera wrapper implements wide/medium/close/detail framing, bounded push/pull/pan/follow moves and cut/dissolve transitions. Count badges remain outside camera transforms and refer to the child group on the bed. Reduced motion freezes camera tracks and staged movement. These main-renderer camera transforms use SVG; they do not claim the Three.js prototype's perspective projection.
 
----
+The 30-second story project has ten timed draft shots. Imported story data rejects unimplemented moments, actors without a staging position, speakers absent from the shot, and child groups in empty-bed/doctor cutaways. Later verse events remain production work in the full-song storyboard. They are not exposed as working editor choices merely because an outfit has been drawn.
 
-## 4. Technical Asset Pipeline: De-Haloing & Base64 Data URIs
+The prototype in `renderer/three/` uses **Three.js 0.187.0** and matching `@types/three` **0.187.0**. It creates a real `PerspectiveCamera`, projects world points with `Vector3`, draws a schematic bed and a flat kangaroo into SVG, and samples a small spring response from the current frame. It does not create a WebGL context.
 
-To maintain 100% deterministic renders in Remotion, headless Chrome (Puppeteer), and local Vite previews:
+| File | Responsibility |
+| --- | --- |
+| `projection.ts` | Bounded camera tracks, perspective projection and an analytic bed-bounce sample |
+| `projection.test.ts` | Deterministic seeking, depth parallax, movement limits, reduced motion and numeric validation |
+| `CameraBounceStudy.tsx` | Remotion frame-driven, schematic visual study |
+| `index.tsx` | Separate six-second study composition; the episode composition is unaffected |
+| `render-study.ts` | Four frame PNGs and an optional six-second MP4 |
 
-1. **Soft Anti-Aliased Alpha Matting (De-Haloing)**:
-   - High-resolution illustrations generated on solid cream paper backgrounds are extracted using flood-fill perimeter analysis.
-   - Pixels along the transition edge are un-premultiplied against the background color (`(246, 239, 219)`) to eliminate white fringing, dark outlines, and "halo" artifacts.
-   - Any outer white die-cut sticker borders are removed so characters integrate naturally into the scene.
-2. **Base64 Data URI Inlining**:
-   - All processed assets are compiled into TypeScript as Base64 Data URIs:
-     - [`joeyAssets.ts`](file:///c:/dev/InteractiveStudio/renderer/story/assets/joeyAssets.ts): Head, tail, feet, and 5 colorway torsos/arms.
-     - [`storyAssets.ts`](file:///c:/dev/InteractiveStudio/renderer/story/assets/storyAssets.ts): Bedroom background, clinic background, Daddy kangaroo, Doctor kangaroo, and sleeping cat.
-   - **Why this is critical**: Eliminates external asset loading latency, file:// protocol sandbox errors, and CORS bundling bugs during headless Remotion rendering.
+Run from the repository root:
 
----
+```powershell
+node --import tsx --test renderer/three/projection.test.ts
+node --import tsx renderer/three/render-study.ts --video
+```
 
-## 5. Staging, Camera Intent & Shot Framing
+The render helper uses an installed Chrome/Edge executable, or `REMOTION_BROWSER_EXECUTABLE`, and writes under `data/exports/three-camera-study/`. Its artifact is a camera-and-motion feasibility study, not the finished song animation. The main editor does not automatically switch to this study.
 
-Each verse follows an authored story sequence:
+The settings use the same shot and movement vocabulary intended for scene cameras: wide/medium/close/detail and locked/push-in/pull-out/pan-left/pan-right/follow-action, with intensity from zero to one. The helper owns no project schema or saved scene data. Integrating its projection into the main renderer remains a separate decision.
 
-| Shot | Purpose | Camera Motion | Visible Count Rule |
-| --- | --- | --- | --- |
-| **Wide** | Establish room, bed, and exact count | Locked or subtle slow push | All active children visible on bed; adults visually separated |
-| **Medium** | Focus on character action and relevant prop | Gentle lateral follow | Action readable without losing bed context |
-| **Close** | Character reaction, dialogue, or telephone call | Usually locked | Shows expressive acting, blinking, and lip-sync |
-| **Detail** | Specific story moment (contact, bump, bandage) | Short, deliberate cut | Immediately returns to context |
+## Simulate the effect, preserve repeatability
 
-- **Reduced Motion**: Locks camera moves, spring oscillations, and bounce squashing while preserving exact story states and visible counts.
-- **Lip-Sync**: Assigned dynamically to the active speaker (`cue.value` mouth phonemes `A` through `H`), while non-speaking characters remain in natural resting smiles (`X`).
+For this production, use authored trajectories and closed-form motion: a parabolic flight arc, squash on anticipation, and a damped spring after mattress contact. Every value must be a function of the absolute frame and explicit settings. This supports scrubbing and rendering frames in any order.
 
----
+The implemented spring is a staged visual effect. It does not solve collisions, bed deformation, anatomy or forces. The scene author must set contact positions and make the action convincing. Introduce a physics engine only if a specific shot needs interactions that authored curves cannot reasonably express; record or deterministically bake the result before final rendering.
 
-## 6. Three.js Feasibility & Future 3D Path
+## A future WebGL integration
 
-The isolated prototype in `renderer/three/` (Three.js 0.187.0) proves camera perspective and depth projection without WebGL overhead:
-- `projection.ts` calculates perspective projection and spring landings onto SVG planes.
-- Full 3D rendering (WebGL) remains deferred until dedicated 3D character assets are benchmarked. The current illustrated 2.5D SVG pipeline renders a 30-second episode in ~45 seconds on standard consumer CPUs, maintaining instant previews and low operational overhead.
+Remotion provides `@remotion/three` to connect React Three Fiber to Remotion. Its `ThreeCanvas` documentation requires animation to be derived from `useCurrentFrame()` rather than a live `useFrame()` loop, and requires explicit canvas dimensions. See [Remotion's Three integration](https://www.remotion.dev/docs/three) and [ThreeCanvas](https://www.remotion.dev/docs/three-canvas).
+
+That route adds React Three Fiber and a version-matched `@remotion/three`. The current project has Remotion 4.0.539, so a future experiment should align all Remotion packages to one exact version instead of independently installing the latest Three integration. No React Three Fiber or `ThreeCanvas` dependency is needed by this projection study.
+
+WebGL rendering can benefit substantially from GPU support. For Remotion 4 on a machine without a GPU, the official backend guidance recommends `swangle` and notes that rendering can be slow. Benchmark an actual representative shot before committing to full 3D; reduce geometry, texture size, shadows and post-processing as needed. This study uses CPU camera maths and ordinary SVG rendering, so it does not require that WebGL backend. See [Remotion GPU guidance](https://www.remotion.dev/docs/gpu) and [GL backend recommendations](https://www.remotion.dev/docs/gl-options).
+
+Measure preview responsiveness, export time, memory and visual consistency on the actual Windows machine. The number of scene objects alone is not a reliable performance promise.
+
+## Licensing
+
+Three.js is MIT-licensed and permits commercial use and modification, subject to preserving its copyright and license notice. It can be used in a proprietary InteractiveStudio product; this does not remove Remotion's separate licensing requirements or licenses for any imported 3D assets. See the [Three.js r187 license](https://raw.githubusercontent.com/mrdoob/three.js/r187/LICENSE) and the existing [productisation note](PRODUCTISATION.md).
+
+The immediate success criterion remains a coherent, editable scene that tells the lyric's story. The projection study establishes a camera and spring technique; it does not establish a complete 3D animation pipeline.

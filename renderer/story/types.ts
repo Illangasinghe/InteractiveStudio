@@ -6,7 +6,7 @@ export type StoryFocus = { x: number; y: number; width: number; height: number }
 /** x/y are the centre of each camera-safe focus rectangle in 1920×1080 world space. */
 export const STORY_FOCUS: Record<StoryBeatId, StoryFocus> = {
   establish: { x: 960, y: 540, width: 1920, height: 1080 },
-  'bed-bounce': { x: 760, y: 610, width: 1450, height: 850 },
+  'bed-bounce': { x: 890, y: 610, width: 1450, height: 850 },
   leap: { x: 1150, y: 530, width: 1540, height: 980 },
   'dad-reaction': { x: 1490, y: 570, width: 840, height: 950 },
   'dad-phone': { x: 1475, y: 620, width: 800, height: 900 },

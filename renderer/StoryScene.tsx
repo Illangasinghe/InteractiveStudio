@@ -8,13 +8,13 @@ export { STORY_FOCUS } from './story/types';
 
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 const REACTION_CONTACT_PROGRESS = 0.14;
-const bedX = (id: string) => 350 + (Math.max(1, Number(id.split('-')[1] ?? 1)) - 1) * 190;
+const bedX = (id: string) => 580 + (Math.max(1, Number(id.split('-')[1] ?? 1)) - 1) * 155;
 
 /** The leap is a single authored action over its scene, rather than a repeated loop. */
 function leapPosition(scene: Scene, progress: number) {
   const p = clamp(progress);
   const startX = bedX(scene.story?.featuredCharacterId ?? 'roo-1');
-  return { x: startX + (1510 - startX) * p, y: 805 + (535 - 805) * p - 220 * 4 * p * (1 - p), rotation: -18 + p * 27 };
+  return { x: startX + (1510 - startX) * p, y: 788 + (535 - 788) * p - 220 * 4 * p * (1 - p), rotation: -18 + p * 27 };
 }
 
 const leapFlightProgress = (sceneProgress: number) => clamp((sceneProgress - 0.65) / 0.35) * 0.7;
@@ -52,7 +52,7 @@ export function StoryScene({ project, scene, timeSec, backdropTransform, foregro
   const isClinic = beatId === 'doctor-advice' || beatId === 'dentist';
   const speaker = speakingActorId ?? 'roo-1';
   const mouthFor = (id: string) => id === speaker ? cue?.value ?? 'X' : 'X';
-  const bedGroup = (pose: 'idle' | 'bounce' | 'wave' | 'sleep' | 'moonwalk' = 'idle', excludeFeatured = false) => scene.characterIds.filter(id => !excludeFeatured || id !== featuredCharacterId).map(id => <RooPuppet key={id} id={id} x={bedX(id)} y={805} scale={0.78} time={time} pose={pose} reducedMotion={reducedMotion} mouth={mouthFor(id)} mouthProgress={cueProgress} />);
+  const bedGroup = (pose: 'idle' | 'bounce' | 'wave' | 'sleep' | 'moonwalk' = 'idle', excludeFeatured = false) => scene.characterIds.filter(id => !excludeFeatured || id !== featuredCharacterId).map(id => <RooPuppet key={id} id={id} x={bedX(id)} y={788} scale={0.78} time={time} pose={pose} reducedMotion={reducedMotion} mouth={mouthFor(id)} mouthProgress={cueProgress} />);
   const father = (pose: 'idle' | 'surprised' | 'phone' | 'point' | 'wave' = 'idle', yOffset = 0, squashX = 1, squashY = 1) => actors.has('dad') ? <RooPuppet actor="dad" x={1510} y={930 + yOffset} scale={1.2} time={time} pose={pose} expression={pose === 'surprised' ? 'surprised' : pose === 'phone' ? 'thoughtful' : 'happy'} reducedMotion={reducedMotion} mouth={mouthFor('dad')} mouthProgress={cueProgress} squashX={squashX} squashY={squashY} /> : null;
   const clinicActor = beatId === 'dentist' ? 'dentist' : 'doctor';
   let action;

@@ -1,6 +1,9 @@
 import type { MouthCue } from '../../packages/core/index';
 import type { StoryActorId } from './types';
 import { IllustratedJoey } from './IllustratedJoey';
+import { IllustratedDad } from './IllustratedDad';
+import { IllustratedDoctor } from './IllustratedDoctor';
+import { IllustratedCat } from './IllustratedCat';
 
 type MouthShape = MouthCue['value'];
 type Pose = 'idle' | 'bounce' | 'leap' | 'wave' | 'surprised' | 'phone' | 'point' | 'sleep' | 'moonwalk' | 'carry';
@@ -78,6 +81,12 @@ export function RooPuppet({ id = 'roo-1', x, y, scale = 1, time = 0, pose = 'idl
 }) {
   if (!actor) {
     return <IllustratedJoey id={id} x={x} y={y} scale={scale} time={time} pose={pose} expression={expression} mouth={mouth} mouthProgress={mouthProgress} reducedMotion={reducedMotion} rotation={rotation} flip={flip} shadow={shadow} squashX={squashX} squashY={squashY} />;
+  }
+  if (actor === 'dad') {
+    return <IllustratedDad x={x} y={y} scale={scale} time={time} pose={pose} expression={expression} mouth={mouth} mouthProgress={mouthProgress} reducedMotion={reducedMotion} rotation={rotation} flip={flip} shadow={shadow} squashX={squashX} squashY={squashY} />;
+  }
+  if (actor === 'doctor' || actor === 'dentist' || actor === 'vet') {
+    return <IllustratedDoctor x={x} y={y} scale={scale} time={time} pose={pose} expression={expression} mouth={mouth} mouthProgress={mouthProgress} reducedMotion={reducedMotion} rotation={rotation} flip={flip} shadow={shadow} squashX={squashX} squashY={squashY} />;
   }
 
   const index = Math.max(0, Number(id.split('-')[1] ?? 1) - 1);
@@ -297,60 +306,7 @@ export function RooPuppet({ id = 'roo-1', x, y, scale = 1, time = 0, pose = 'idl
 }
 
 export function CatPuppet({ x, y, scale = 1, startled = false, time = 0, reducedMotion = false }: { x: number; y: number; scale?: number; startled?: boolean; time?: number; reducedMotion?: boolean }) {
-  const tail = reducedMotion ? 0 : Math.sin(time * 2.5) * 9;
-  return <g transform={`translate(${x} ${y}) scale(${scale})`} data-story-actor="cat">
-    {/* Cozy bedroom floor cushion/rug under the cat with rich contrast against the floor */}
-    <ellipse cy="12" rx="124" ry="26" fill="#3f615d" />
-    <ellipse cy="11" rx="116" ry="21" fill="#527c76" />
-    <ellipse cy="11" rx="108" ry="17" fill="#49706a" />
-    {/* Rug stitch border */}
-    <ellipse cy="11" rx="112" ry="19" fill="none" stroke="#d5e4de" strokeWidth="2.5" strokeDasharray="6 6" />
-
-    {/* Cat tail */}
-    <path d="M69-23 Q142-41 119-114 Q111-140 92-126" stroke="#c37d45" strokeWidth="25" fill="none" strokeLinecap="round" transform={`rotate(${tail} 69 -23)`} />
-    <path d="M69-23 Q142-41 119-114 Q111-140 92-126" stroke="#e8a366" strokeWidth="19" fill="none" strokeLinecap="round" transform={`rotate(${tail} 69 -23)`} />
-
-    {/* Cat body */}
-    <ellipse cy="-37" rx="82" ry="52" fill="#e8a366" />
-    {/* Soft back shading */}
-    <path d="M-60-45 Q0-20 60-45 Q0-70 -60-45Z" fill="#cf8644" opacity="0.4" />
-    {/* Paws */}
-    <ellipse cx="-38" cy="-5" rx="37" ry="14" fill="#fff5e8" />
-    <ellipse cx="35" cy="-5" rx="37" ry="14" fill="#fff5e8" />
-    {/* Toe marks */}
-    <path d="M-44-12 V-2 M-32-12 V-2 M29-12 V-2 M41-12 V-2" stroke="#dfb986" strokeWidth="2" strokeLinecap="round" />
-
-    {/* Cat Head */}
-    <g transform={`translate(-12 ${startled ? -113 : -93})`}>
-      {/* Ears */}
-      <path d="M-53-18 L-53-77 -12-43 M15-43 L52-77 54-18" fill="#e8a366" />
-      <path d="M-44-36 L-43-63 -24-43 M28-43 L43-63 43-35" fill="#f7b7ab" />
-      {/* Face */}
-      <ellipse rx="65" ry="49" fill="#f2b479" />
-      {/* Cream muzzle patch */}
-      <ellipse cy="12" rx="36" ry="22" fill="#fff6ea" />
-      {startled ? (
-        <g fill="#3d2c20">
-          <ellipse cx="-25" cy="-5" rx="7" ry="13" />
-          <ellipse cx="25" cy="-5" rx="7" ry="13" />
-          <circle cx="-23" cy="-8" r="2.5" fill="#ffffff" />
-          <circle cx="27" cy="-8" r="2.5" fill="#ffffff" />
-        </g>
-      ) : (
-        <g stroke="#5c422f" strokeWidth="4" fill="none" strokeLinecap="round">
-          <path d="M-36-3 Q-25 7 -15-3 M15-3 Q25 7 36-3" />
-        </g>
-      )}
-      <path d="M-7 13 L7 13 0 21Z" fill="#d96859" />
-      <path d="M0 21 Q-8 31 -17 24 M0 21 Q8 31 17 24" fill="none" stroke="#d96859" strokeWidth="2.5" strokeLinecap="round" />
-      {/* Whiskers */}
-      <g stroke="#a47c55" strokeWidth="2.5" strokeLinecap="round">
-        <path d="M-34 17 L-75 8 M-34 26 L-76 29 M34 17 L75 8 M34 26 L76 29" />
-      </g>
-      {/* Forehead stripes */}
-      <path d="M-14-36 L-9-22 M6-38 L7-23 M24-32 L21-20" stroke="#cf8644" strokeWidth="5" strokeLinecap="round" />
-    </g>
-  </g>;
+  return <IllustratedCat x={x} y={y} scale={scale} startled={startled} time={time} reducedMotion={reducedMotion} />;
 }
 
 export function Sparkle({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) {

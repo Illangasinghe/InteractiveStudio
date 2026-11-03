@@ -1,5 +1,6 @@
 import type { MouthCue } from '../../packages/core/index';
 import type { StoryActorId } from './types';
+import { IllustratedJoey } from './IllustratedJoey';
 
 type MouthShape = MouthCue['value'];
 type Pose = 'idle' | 'bounce' | 'leap' | 'wave' | 'surprised' | 'phone' | 'point' | 'sleep' | 'moonwalk' | 'carry';
@@ -55,7 +56,7 @@ function Mouth({ shape, expression, progress = 0.5 }: { shape: MouthShape; expre
 }
 
 function Outfit({ actor }: { actor: Exclude<StoryActorId, 'cat'> }) {
-  const coat = CLOTHES[actor];
+  const coat = actor === 'dad' ? 'url(#dadCardiganGrad)' : actor === 'doctor' ? 'url(#docCoatGrad)' : CLOTHES[actor];
   return <g>
     <path d="M-50-24 Q0-42 50-24 L69 103 Q0 140-69 103Z" fill={coat} />
     {/* Soft inner shadow on coat hem */}
@@ -75,6 +76,10 @@ export function RooPuppet({ id = 'roo-1', x, y, scale = 1, time = 0, pose = 'idl
   id?: string; x: number; y: number; scale?: number; time?: number; pose?: Pose; expression?: Expression;
   mouth?: MouthShape; mouthProgress?: number; reducedMotion?: boolean; rotation?: number; flip?: boolean; actor?: Exclude<StoryActorId, 'cat'>; shadow?: boolean; squashX?: number; squashY?: number;
 }) {
+  if (!actor) {
+    return <IllustratedJoey id={id} x={x} y={y} scale={scale} time={time} pose={pose} expression={expression} mouth={mouth} mouthProgress={mouthProgress} reducedMotion={reducedMotion} rotation={rotation} flip={flip} shadow={shadow} squashX={squashX} squashY={squashY} />;
+  }
+
   const index = Math.max(0, Number(id.split('-')[1] ?? 1) - 1);
   const phase = time * Math.PI * 2.5 + index * 0.6;
   const sinPhase = Math.sin(phase);
@@ -89,11 +94,11 @@ export function RooPuppet({ id = 'roo-1', x, y, scale = 1, time = 0, pose = 'idl
   const earLag = reducedMotion ? 0 : pose === 'bounce' ? Math.cos(phase - 0.35) * 6 : pose === 'leap' ? -12 : Math.sin(time * 1.8 + index) * 2;
   const leftArm = pose === 'leap' || pose === 'surprised' ? 142 : pose === 'carry' ? -20 : pose === 'bounce' && !reducedMotion ? -12 - absSin * 18 : 0;
   const rightArm = pose === 'leap' || pose === 'surprised' ? -142 : pose === 'phone' ? -115 : pose === 'point' ? -106 : pose === 'wave' ? -130 + (reducedMotion ? 0 : Math.sin(time * 5) * 14) : pose === 'carry' ? 20 : pose === 'bounce' && !reducedMotion ? 12 + absSin * 18 : 0;
-  const coat = actor === 'dad' ? '#ad7d59' : actor === 'mum' ? '#bb8c6e' : actor ? '#bda082' : COATS[index % COATS.length];
+  const coat = actor === 'dad' ? 'url(#dadFurGrad)' : actor === 'doctor' ? 'url(#docFurGrad)' : actor === 'mum' ? '#bb8c6e' : actor ? '#bda082' : COATS[index % COATS.length];
   
   // Sleeves & cuffs
   const pj = !actor ? ROO_PAJAMAS[index % ROO_PAJAMAS.length] : null;
-  const sleeves = actor ? CLOTHES[actor] : pj ? pj.sleeve : coat;
+  const sleeves = actor === 'dad' ? 'url(#dadCardiganGrad)' : actor === 'doctor' ? 'url(#docCoatGrad)' : actor ? CLOTHES[actor] : pj ? pj.sleeve : coat;
   const cuffColor = actor === 'dad' ? '#527c75' : pj ? pj.cuff : 'rgba(255,255,255,0.4)';
   const paleSleeves = actor === 'doctor' || actor === 'dentist' || actor === 'vet';
   
@@ -103,6 +108,28 @@ export function RooPuppet({ id = 'roo-1', x, y, scale = 1, time = 0, pose = 'idl
   const shadowOpacity = reducedMotion ? 0.12 : Math.max(0.05, 0.14 + bounce / 600);
 
   return <g transform={`translate(${x} ${y}) scale(${flip ? -scale : scale} ${scale}) rotate(${rotation})`} data-story-character={actor ?? id}>
+    <defs>
+      <radialGradient id="dadFurGrad" cx="45%" cy="35%" r="65%">
+        <stop offset="0%" stopColor="#c5865e" />
+        <stop offset="70%" stopColor="#aa6d48" />
+        <stop offset="100%" stopColor="#8d5433" />
+      </radialGradient>
+      <radialGradient id="docFurGrad" cx="45%" cy="35%" r="65%">
+        <stop offset="0%" stopColor="#cf966e" />
+        <stop offset="70%" stopColor="#b47b55" />
+        <stop offset="100%" stopColor="#965f3b" />
+      </radialGradient>
+      <linearGradient id="dadCardiganGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#6ea097" />
+        <stop offset="70%" stopColor="#558179" />
+        <stop offset="100%" stopColor="#436861" />
+      </linearGradient>
+      <linearGradient id="docCoatGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#ffffff" />
+        <stop offset="75%" stopColor="#f5f2e8" />
+        <stop offset="100%" stopColor="#dfdacb" />
+      </linearGradient>
+    </defs>
     {shadow ? <ellipse cx="15" cy="2" rx={96 * shadowScale} ry={14 * shadowScale} fill="#596b51" opacity={shadowOpacity} /> : null}
     <g transform={`translate(0 ${-155 + bounce}) rotate(${tilt}) scale(${finalSquashX} ${finalSquashY})`}>
       

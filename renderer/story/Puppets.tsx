@@ -311,5 +311,16 @@ export function CatPuppet({ x, y, scale = 1, startled = false, time = 0, reduced
 }
 
 export function Sparkle({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) {
-  return <path d="M0-20 Q4-4 20 0 Q4 4 0 20 Q-4 4-20 0 Q-4-4 0-20Z" transform={`translate(${x} ${y}) scale(${scale})`} fill="#e1b66d" />;
+  return (
+    <g transform={`translate(${x} ${y}) scale(${scale})`}>
+      <path
+        d="M0-22 Q4-4 22 0 Q4 4 0 22 Q-4 4-22 0 Q-4-4 0-22Z"
+        fill="#ffca3a"
+        stroke="#ffffff"
+        strokeWidth="2.5"
+        strokeLinejoin="round"
+      />
+      <circle cx="0" cy="0" r="3.5" fill="#ffffff" />
+    </g>
+  );
 }

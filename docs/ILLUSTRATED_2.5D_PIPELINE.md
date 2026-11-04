@@ -121,3 +121,43 @@ Following the core production principle (**"Fewer moving parts, richer action-sp
 | **Verse 2 (Two)** | Splash & Laundry | `laundry_kangaroo.png`<br>`laundry_towel_wrap.png`<br>`wet_quilt_overlay.png` | Pretend splash wet bedspread; Laundry man brings big fluffy towel. |
 | **Verse 1 (One)** | Moonwalk & Dentist | `dentist_kangaroo.png`<br>`dentist_playdoh_prop.png` | Calm moonwalk bump; Dentist advises soothing play-doh / quiet play. |
 | **Verse 0 (Finale)**| Garden Trampoline | `garden_trampoline_bg.jpg`<br>`mommy_kangaroo_waving.png`<br>`family_celebration.png` | Supervised outdoor trampoline; all 5 joeys bouncing safely together; Mommy & Daddy waving. |
+
+
+---
+
+## 6. Multi-Character Strips, Floor Registration & 2-Stage Trajectory Physics
+
+### A. Character Animation Strips (Flipbook Watercolor)
+To achieve fluid, organic character movement without mechanical skeletal joints or rubbery vector deformation, characters employ multi-pose horizontal illustration strips:
+1. **Joey Bounce Strip** (6 frames, `joeyStripAssets.ts`):
+   - Frame 0: Standing upright with hands clasped.
+   - Frame 1: Coiling / squatting into mattress.
+   - Frame 2: Ascending bounce with legs kicking out.
+   - Frame 3: Apex joyful star leap with arms outspread.
+   - Frame 4: Forward dive / reaching leap across room.
+   - Frame 5: Tumble / landing balance with feet and tail outstretched.
+   - Sliced, de-haloed, and colorway-remapped across all 5 pajama patterns (`peach`, `blue`, `yellow`, `mint`, `lavender`).
+2. **Kitten Strip** (3 poses, `cat_sleep`, `cat_awake`, `cat_startled`):
+   - Pose 0: Curled up asleep on teal braided rug.
+   - Pose 1: Awake and alert, sitting upright looking up at bed jumpers.
+   - Pose 2: Comical startled hop springing off the mat with wide eyes.
+   - Replaces crude vector eye overlays with authentic Beatrix Potter watercolor expressions.
+
+### B. Ground Anchoring & Zero-Floating Floor Registration
+A common artifact in 2.5D layered composition is character or prop "floating" above shadows.
+- **Root Cause**: Uncropped stray watercolor specks or asymmetric padding inflate image bounds, offsetting the apparent visual base from the local SVG origin $(0, 0)$.
+- **Solution**: Standardized registration canvas ($480 \times 560$ for cat, $280 \times 560$ for joeys):
+  - Detect exact contact pixels of the rug or feet.
+  - Anchor the ground contact point to the exact bottom baseline $y = \text{height} - \text{margin}$ and horizontal center $x = \text{width} / 2$.
+  - Render with SVG `translate(-width/2, -ground_y)` so $(0, 0)$ in world coordinates is locked to the floor plane and contact shadow.
+
+### C. Doctor & Adult Kangaroo 100% Solid Opacity
+- **Vulnerability**: Global color-distance keying mistakes white lab coats, nurse uniforms, white undershirts, or cream belly fur for the paper background.
+- **Outer-Perimeter BFS Flood-Fill**: Flooding inward exclusively from image boundary coordinates $(x=0, y=0, x=W-1, y=H-1)$ guarantees that enclosed interior light artwork remains 100% solid and opaque (0 semi-transparent pixels inside coats).
+
+### D. 2-Stage Head Bonk & Tumble Trajectory
+The nursery rhyme narrative requires Joey to bump his head before coming to rest.
+1. **Stage 1 (Leap Arc to Head)**: In beat `'leap'`, Joey arcs from bed mattress $(X_{bed}, 745)$ across the room along a parabolic curve to Father's head $(X=1580, Y=475)$ at apex flight.
+2. **Stage 2A (Head Impact & Bonk)**: In beat `'dad-reaction'` ($p < 0.28$), Joey perches on Father's head. Dad squashes downward (`dadSquashY = 1 - impact * 0.12`), gasps in `pose='surprised'`, and bright gold starred sparkles (`#ffca3a` with `#ffffff` stroke) burst from the impact contact.
+3. **Stage 2B (Tumble Fall to Rug)**: Over $0.28 \le p < 0.65$, Joey slides and tumbles downward under quadratic gravity acceleration $y(t) = Y_{head} + (Y_{rug} - Y_{head}) \cdot t^2$ to the braided rug at $(1360, 925)$.
+4. **Stage 2C (Landed & Settled)**: For $p \ge 0.65$, Joey rests safely on the rug in sitting pose, rubbing his bumped head with dizzy stars, while Dad looks down in astonishment before calling the clinic.

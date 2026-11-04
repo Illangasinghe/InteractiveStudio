@@ -95,16 +95,29 @@ Layer stack inside the root `<g>` transform:
 
 ## 5. Sets & Staging Alignment
 
-1. **Bed Group Coordinates**: 5 joeys positioned across the mattress quilt (`x = 580..1200, y = 788`).
-2. **Leap & Floor Landing**: The featured joey leaps off the bed in a continuous parabolic flight arc, landing cleanly onto the braided floor rug at `x = 1360, y = 925` beside the foot of the bed. This avoids flying through Daddy Kangaroo (`x = 1600`), giving clear theatrical separation.
-3. **Doctor Clinic**: Doctor stands centered in the examination room (`x = 985, y = 932`) with full medical background cabinetry and window garden views.
+1. **Bed Group Coordinates**:
    $$\text{bedX}(i) = 580 + (i - 1) \times 155 \quad \text{for } i \in [1, 5]$$
-   Places the five kangaroos between $x = 580$ and $x = 1200$ directly atop the illustrated toddler bed's mattress and purple quilt at $y = 788$.
-2. **Leap Trajectory**:
+   Places the five kangaroos between $x = 580$ and $x = 1200$ directly atop the toddler bed's mattress and purple quilt at $y = 788$.
+2. **Floor Landing Trajectory**:
    $$\begin{aligned}
-   x(p) &= x_{\text{start}} + (1510 - x_{\text{start}}) \times p \\
-   y(p) &= 788 + (535 - 788) \times p - 220 \times 4p(1 - p) \\
-   \text{rot}(p) &= -18^\circ + 27^\circ \times p
+   x(p) &= x_{\text{start}} + (1360 - x_{\text{start}}) \times p \\
+   y(p) &= 788 + (925 - 788) \times p - 200 \times 4p(1 - p) \\
+   \text{rot}(p) &= -14^\circ + 18^\circ \times p
    \end{aligned}$$
-   Creates a smooth parabolic arc from the bed onto Daddy Kangaroo's head/shoulders.
+   Creates a smooth parabolic arc from the mattress ($y = 788$) and lands the featured joey gently onto the braided floor rug at $x = 1360, y = 925$ at the foot of the bed, cleanly separated from Daddy Kangaroo ($x = 1600$) without character collision or occlusion.
+3. **Doctor Clinic**: Doctor stands centered in the examination room ($x = 985, y = 932$) with full medical background cabinetry and window garden views.
 
+---
+
+## 6. Action-State Asset Roadmap (Verses 5 to 0)
+
+Following the core production principle (**"Fewer moving parts, richer action-specific illustrated assets"**), upcoming verses avoid mechanical skeletal rigs and rely on dedicated, handcrafted watercolor action assets:
+
+| Verse / Scene | Story Beat | Action Asset | Purpose |
+| :--- | :--- | :--- | :--- |
+| **Verse 5 (Five)** | Call & Advice | `daddy_kangaroo_phone.png`<br>`doctor_kangaroo_advice.png`<br>`joey_bumped_head.png` | Daddy on phone; Doctor wagging finger; Joey resting on rug holding head. |
+| **Verse 4 (Four)** | Cat & Vet Advice | `vet_kangaroo_phone.png`<br>`vet_kangaroo_advice.png`<br>`joey_wearing_helmet.png`<br>`cat_startled_cushion.png` | Joey tries a flip; startled cat pops out of cushion; Dad calls Vet; Vet advises helmet. |
+| **Verse 3 (Three)** | Ceiling Fan & Bed | `handyman_kangaroo.png`<br>`ceiling_fan_prop.png`<br>`heavy_duty_bed.png` | Toy touches fan; Dad calls Handyman; Handyman inspects reinforced toddler bed. |
+| **Verse 2 (Two)** | Splash & Laundry | `laundry_kangaroo.png`<br>`laundry_towel_wrap.png`<br>`wet_quilt_overlay.png` | Pretend splash wet bedspread; Laundry man brings big fluffy towel. |
+| **Verse 1 (One)** | Moonwalk & Dentist | `dentist_kangaroo.png`<br>`dentist_playdoh_prop.png` | Calm moonwalk bump; Dentist advises soothing play-doh / quiet play. |
+| **Verse 0 (Finale)**| Garden Trampoline | `garden_trampoline_bg.jpg`<br>`mommy_kangaroo_waving.png`<br>`family_celebration.png` | Supervised outdoor trampoline; all 5 joeys bouncing safely together; Mommy & Daddy waving. |

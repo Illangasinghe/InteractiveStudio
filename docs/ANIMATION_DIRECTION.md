@@ -21,6 +21,34 @@ Begin each shot from an authored composition. Keep moves bounded, ease them at t
 
 Character improvements should include anticipation before a jump, a coherent flight arc, contact and recovery, a small tail follow-through, eye direction and an appropriate reaction pose. Add a prop only when the action needs it. Repeated idle bouncing alone will not communicate the different verse events.
 
+## Core Paradigm: Pose-Based Action Assets vs. Over-Jointed Puppets
+
+A critical architectural learning from the early iterations is the clear superiority of **action-specific illustrated assets** over **over-jointed mechanical puppets**:
+
+### Why Over-Jointed Skeletal 2D Puppets Fail in Storybook Animation
+1. **Mechanical Seams & Edge Creases**: Slicing a painted character into 10+ micro-limbs (upper arm, forearm, hand, chin, snout) and rotating them programmatically causes awkward gaps, dislocated shoulders, and visible joint overlaps. In watercolor and colored pencil styles, cloth folds and directional shadows cannot simply rotate without breaking the illusion.
+2. **Floating Vector Overlays**: When a generic standing puppet has to perform an action (e.g. holding a phone, pointing a finger, or wearing glasses), attempting to paste flat geometric shapes (`<rect>`, `<ellipse>`) or vector stick arms onto painted fur results in a jarring "sticker-on-sticker" visual clash.
+3. **Rigid, Lifeless Silhouettes**: A single static body mesh rotated mechanically cannot convey a genuine change in emotional state (e.g., a father standing calmly vs. a father hunched over in worry speaking into an emergency receiver).
+
+### The Pose-Based Asset Solution: Fewer Moving Parts, Richer Actions
+Instead of building complex mechanical armatures with dozens of moving joints, the production follows the classical picture-book animation paradigm (*Bluey*, *Beatrix Potter*, *Sarah & Duck*):
+
+* **Dedicated, Natively Painted Action Assets**: Create complete, handcrafted watercolor illustrations for specific narrative beats:
+  - `daddy_kangaroo_standing.png` (relaxed bedtime supervision)
+  - `daddy_kangaroo_phone.png` (worried fatherly posture holding phone handset to ear)
+  - `doctor_kangaroo_phone.png` (listening attentively on clinic telephone)
+  - `doctor_kangaroo_advice.png` (advisory wagging finger with paw in coat pocket)
+  - `joey_bounce.png` (upright joyful bounce on mattress)
+  - `joey_landing_rug.png` (sitting gently on braided rug holding bumped head)
+* **Integrated Props & Hands**: Props (phones, stethoscopes, bandages, helmets) are painted organically into the character's paws with correct perspective, occlusion, and lighting.
+* **Scene-Level Dynamics**: Movement is driven by high-level physical transforms rather than micro-joint rotations:
+  - **Parabolic Trajectory**: Flight arcs calculated via clean projectile physics ($y(t) = y_0 + v_0 t - \frac{1}{2} g t^2$).
+  - **Squash & Stretch**: Dynamic volume-preserving scaling ($S_x \times S_y \approx 1$) on anticipation and landing.
+  - **Secondary Motion**: Organic breathing cycles, advisory sways, and synchronized speech bobs (`talkBob`).
+* **Deterministic, CPU-Friendly Renders**: Swapping and transforming complete illustrated assets renders in milliseconds per frame in Remotion without WebGL shader overhead, Z-fighting, or alpha sorting bugs.
+
+---
+
 ## 2.5D now, full 3D after an asset proof
 
 The current SVG approach can separate the rear wall, room props, bed, character bodies and foreground details. Placing those layers at different authored depths adds parallax while preserving the existing visual style. Three.js's perspective camera and vector projection provide standard 3D-to-screen calculations; this can project a 2D character billboard alongside a perspective bed or prop. See the official [PerspectiveCamera implementation and API documentation comments](https://raw.githubusercontent.com/mrdoob/three.js/r187/src/cameras/PerspectiveCamera.js) and [Vector3 implementation](https://raw.githubusercontent.com/mrdoob/three.js/r187/src/math/Vector3.js).

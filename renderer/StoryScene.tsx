@@ -8,7 +8,7 @@ export { STORY_FOCUS } from './story/types';
 
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 const REACTION_CONTACT_PROGRESS = 0.14;
-const bedX = (id: string) => 580 + (Math.max(1, Number(id.split('-')[1] ?? 1)) - 1) * 155;
+const bedX = (id: string) => 610 + (Math.max(1, Number(id.split('-')[1] ?? 1)) - 1) * 135;
 
 /** The leap is a single authored action over its scene, rather than a repeated loop. */
 function leapPosition(scene: Scene, progress: number) {
@@ -18,7 +18,7 @@ function leapPosition(scene: Scene, progress: number) {
   const targetY = 925;
   return {
     x: startX + (targetX - startX) * p,
-    y: 788 + (targetY - 788) * p - 200 * 4 * p * (1 - p),
+    y: 745 + (targetY - 745) * p - 200 * 4 * p * (1 - p),
     rotation: -14 + p * 18,
   };
 }
@@ -58,7 +58,7 @@ export function StoryScene({ project, scene, timeSec, backdropTransform, foregro
   const isClinic = beatId === 'doctor-advice' || beatId === 'dentist';
   const speaker = speakingActorId ?? 'roo-1';
   const mouthFor = (id: string) => id === speaker ? cue?.value ?? 'X' : 'X';
-  const bedGroup = (pose: 'idle' | 'bounce' | 'wave' | 'sleep' | 'moonwalk' = 'idle', excludeFeatured = false) => scene.characterIds.filter(id => !excludeFeatured || id !== featuredCharacterId).map(id => <RooPuppet key={id} id={id} x={bedX(id)} y={788} scale={0.78} time={time} pose={pose} reducedMotion={reducedMotion} mouth={mouthFor(id)} mouthProgress={cueProgress} />);
+  const bedGroup = (pose: 'idle' | 'bounce' | 'wave' | 'sleep' | 'moonwalk' = 'idle', excludeFeatured = false) => scene.characterIds.filter(id => !excludeFeatured || id !== featuredCharacterId).map(id => <RooPuppet key={id} id={id} x={bedX(id)} y={745} scale={0.78} time={time} pose={pose} reducedMotion={reducedMotion} mouth={mouthFor(id)} mouthProgress={cueProgress} />);
   const father = (pose: 'idle' | 'surprised' | 'phone' | 'point' | 'wave' = 'idle', yOffset = 0, squashX = 1, squashY = 1) => actors.has('dad') ? <RooPuppet actor="dad" x={1600} y={930 + yOffset} scale={1.2} time={time} pose={pose} expression={pose === 'surprised' ? 'surprised' : pose === 'phone' ? 'thoughtful' : 'happy'} reducedMotion={reducedMotion} mouth={mouthFor('dad')} mouthProgress={cueProgress} squashX={squashX} squashY={squashY} /> : null;
   const clinicActor = beatId === 'dentist' ? 'dentist' : 'doctor';
   let action;

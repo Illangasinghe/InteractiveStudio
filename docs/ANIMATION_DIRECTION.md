@@ -49,6 +49,22 @@ Instead of building complex mechanical armatures with dozens of moving joints, t
 
 ---
 
+
+### 4. Character Animation Strips (Sprite Sheets) for Cohesive Motion
+To elevate beyond static poses without falling into the trap of over-jointed skeletal rigs, character actions with repeating or dynamic cyclical motion (such as bouncing, jumping, and landing) utilize **illustrated animation strips**:
+- **Handcrafted Flipbook Poses**: A single watercolor-illustrated strip captures the authentic anatomical curve, haunches compression, foot push-off, apex float, and impact squash:
+  1. *Pose 0: Crouch & Anticipation* (coiled haunches, tucked paws, ears back)
+  2. *Pose 1: Upward Launch* (stretched torso, pushing feet, ears swept back)
+  3. *Pose 2: Apex Float* (mid-air starfish/joyful float, weightless paws, perked ears)
+  4. *Pose 3: Descent & Reach* (drifting downward, feet extending towards mattress)
+  5. *Pose 4: Impact Squash* (mattress compression, knees bent deep)
+  6. *Pose 5: Upright Standing* (classic kangaroo tripod stance with tail touching ground)
+- **Zero-Joint Fluidity**: Every frame is an intact, complete illustration. There are no dislocated shoulders, severed neck seams, or artificial joint cuts.
+- **Automated Colorway Pipelines**: A single master illustration strip in peach is automatically segmented via outer-perimeter BFS floodfill (preserving all interior white collars, chest highlights, and charcoal pencil strokes) and hue-shifted into 5 pastel colorways (peach, lue, yellow, mint, lavender) generating 30 high-resolution registered assets.
+- **Deterministic Remotion Playback**: Remotion computes frame index algebraically (Math.floor(time * speed) % 5), achieving 30 fps deterministic seeking with zero simulation overhead.
+
+---
+
 ## 2.5D now, full 3D after an asset proof
 
 The current SVG approach can separate the rear wall, room props, bed, character bodies and foreground details. Placing those layers at different authored depths adds parallax while preserving the existing visual style. Three.js's perspective camera and vector projection provide standard 3D-to-screen calculations; this can project a 2D character billboard alongside a perspective bed or prop. See the official [PerspectiveCamera implementation and API documentation comments](https://raw.githubusercontent.com/mrdoob/three.js/r187/src/cameras/PerspectiveCamera.js) and [Vector3 implementation](https://raw.githubusercontent.com/mrdoob/three.js/r187/src/math/Vector3.js).

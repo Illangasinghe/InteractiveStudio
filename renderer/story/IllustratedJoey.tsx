@@ -1,33 +1,29 @@
 import type { MouthCue } from '../../packages/core/index';
 import type { StoryActorId } from './types';
 import {
-  headDataUri,
-  tailDataUri,
-  footLeftDataUri,
-  footRightDataUri,
-  COLORWAY_TORSOS,
-  COLORWAY_ARMS_LEFT,
-  COLORWAY_ARMS_RIGHT,
-} from './assets/joeyAssets';
+  ROO_COLORWAYS,
+  getJoeyStripFrame,
+  type RooColorway,
+} from './assets/joeyStripAssets';
 
 type MouthShape = MouthCue['value'];
 type Pose = 'idle' | 'bounce' | 'leap' | 'wave' | 'surprised' | 'phone' | 'point' | 'sleep' | 'moonwalk' | 'carry';
 type Expression = 'happy' | 'surprised' | 'sleepy' | 'thoughtful';
 
-function Mouth({ shape, expression, progress = 0.5 }: { shape: MouthShape; expression: Expression; progress?: number }) {
+function Mouth({ shape, progress = 0.5 }: { shape: MouthShape; progress?: number }) {
   if (shape === 'X' || shape === 'A') {
     // Closed resting mouth: natural illustrated smile shows cleanly
     return null;
   }
   const openEnvelope = 0.72 + 0.28 * Math.sin(Math.max(0, Math.min(1, progress)) * Math.PI);
-  const baseHeight = shape === 'D' || shape === 'E' ? 9 : shape === 'B' ? 4 : 6;
-  const baseWidth = shape === 'F' || shape === 'H' ? 6 : 9;
-  const height = Math.max(2.5, baseHeight * openEnvelope);
-  const width = Math.max(4, baseWidth * (0.85 + 0.15 * openEnvelope));
+  const baseHeight = shape === 'D' || shape === 'E' ? 7 : shape === 'B' ? 3.5 : 5;
+  const baseWidth = shape === 'F' || shape === 'H' ? 5 : 7.5;
+  const height = Math.max(2, baseHeight * openEnvelope);
+  const width = Math.max(3.5, baseWidth * (0.85 + 0.15 * openEnvelope));
   return (
-    <g transform="translate(0 22)" opacity={0.85}>
+    <g transform="translate(68 -267)" opacity={0.88}>
       <ellipse cy="0" rx={width} ry={height} fill="#753c30" />
-      {height > 4 ? <ellipse cy={height * 0.35} rx={width * 0.6} ry={height * 0.3} fill="#e59892" /> : null}
+      {height > 3.5 ? <ellipse cy={height * 0.35} rx={width * 0.6} ry={height * 0.3} fill="#e59892" /> : null}
     </g>
   );
 }
@@ -66,82 +62,120 @@ export function IllustratedJoey({
   squashX?: number;
   squashY?: number;
 }) {
+  // Determine colorway by joey index
   const index = Math.max(0, Number(id.split('-')[1] ?? 1) - 1);
-  const torsoUri = COLORWAY_TORSOS[index % COLORWAY_TORSOS.length];
-  const armLeftUri = COLORWAY_ARMS_LEFT[index % COLORWAY_ARMS_LEFT.length];
-  const armRightUri = COLORWAY_ARMS_RIGHT[index % COLORWAY_ARMS_RIGHT.length];
+  const colorway: RooColorway = ROO_COLORWAYS[index % ROO_COLORWAYS.length];
 
-  const phase = time * Math.PI * 2.5 + index * 0.6;
-  const sinPhase = Math.sin(phase);
-  const absSin = Math.abs(sinPhase);
+  // Bounce cycle calculation
+  // 5 frames in bounce loop: 0: Crouch -> 1: Launch -> 2: Apex Float -> 3: Descent -> 4: Squash -> 0
+  const bounceSpeed = 1.55;
+  const cycleProgress = ((time * bounceSpeed + index * 0.22) % 1 + 1) % 1;
 
-  const bounce = reducedMotion ? 0 : pose === 'bounce' ? -absSin * 54 : pose === 'moonwalk' ? sinPhase * 4 : Math.sin(time * 1.6 + index) * 2.5;
-  const bounceSquashY = reducedMotion ? 1 : pose === 'bounce' ? (absSin < 0.22 ? 0.92 + (absSin / 0.22) * 0.08 : 1 + (absSin - 0.22) * 0.065) : 1 + Math.sin(time * 1.6 + index) * 0.012;
-  const bounceSquashX = reducedMotion ? 1 : 2 - bounceSquashY;
-  const finalSquashX = squashX * bounceSquashX;
-  const finalSquashY = squashY * bounceSquashY;
+  let frameIndex = 5; // Default: Frame 5 (Upright Standing)
+  let verticalBounceOffset = 0;
 
-  const tilt = reducedMotion ? 0 : pose === 'bounce' ? sinPhase * 4 : pose === 'moonwalk' ? -9 : Math.sin(time * 0.9 + index) * 0.8;
-  const tailSwing = reducedMotion ? 0 : pose === 'bounce' ? Math.cos(phase - 0.5) * 11 : pose === 'leap' ? -18 : Math.sin(time * 2 + index) * 4;
+  if (pose === 'bounce') {
+    if (reducedMotion) {
+      frameIndex = 5;
+    } else {
+      // 5-phase bounce flipbook
+      if (cycleProgress < 0.18) {
+        frameIndex = 0; // Crouch anticipation on mattress
+        verticalBounceOffset = 4;
+      } else if (cycleProgress < 0.42) {
+        frameIndex = 1; // Launch upward
+        verticalBounceOffset = -8;
+      } else if (cycleProgress < 0.68) {
+        frameIndex = 2; // Apex float mid-air
+        verticalBounceOffset = -18;
+      } else if (cycleProgress < 0.88) {
+        frameIndex = 3; // Descent towards mattress
+        verticalBounceOffset = -6;
+      } else {
+        frameIndex = 4; // Impact squash on mattress
+        verticalBounceOffset = 6;
+      }
+    }
+  } else if (pose === 'leap') {
+    // Airborne flight: Apex float (Frame 2) or Launch (Frame 1)
+    frameIndex = 2;
+  } else if (pose === 'surprised') {
+    frameIndex = 2; // Starfish joyful/surprised arms
+  } else if (pose === 'sleep') {
+    frameIndex = 0; // Cozily crouched
+  } else {
+    // idle, wave, point, carry, moonwalk -> Frame 5 (Upright standing)
+    frameIndex = 5;
+  }
 
-  const leftArm = pose === 'leap' || pose === 'surprised' ? 115 : pose === 'carry' ? -20 : pose === 'bounce' && !reducedMotion ? -8 - absSin * 14 : 0;
-  const rightArm = pose === 'leap' || pose === 'surprised' ? -115 : pose === 'phone' ? -100 : pose === 'point' ? -90 : pose === 'wave' ? -110 + (reducedMotion ? 0 : Math.sin(time * 5) * 14) : pose === 'carry' ? 20 : pose === 'bounce' && !reducedMotion ? 8 + absSin * 14 : 0;
+  const frameUri = getJoeyStripFrame(colorway, frameIndex);
+
+  // Subtle natural squash/stretch & breathing
+  const isBouncing = pose === 'bounce' && !reducedMotion;
+  const breatheSquashY = reducedMotion ? 1 : isBouncing ? 1 : 1 + Math.sin(time * 2.2 + index) * 0.015;
+  const breatheSquashX = reducedMotion ? 1 : isBouncing ? 1 : 2 - breatheSquashY;
+  const finalSquashX = squashX * breatheSquashX;
+  const finalSquashY = squashY * breatheSquashY;
+
+  // Tilt during bounce
+  const tilt = reducedMotion ? 0 : isBouncing ? Math.sin(time * Math.PI * 3.1 + index) * 3 : 0;
+
+  // Contact shadow dynamics based on frame height
+  const isApex = frameIndex === 2;
+  const isAir = frameIndex === 1 || frameIndex === 3;
+  const isSquash = frameIndex === 0 || frameIndex === 4;
+  const shadowScale = reducedMotion ? 1 : isApex ? 0.65 : isAir ? 0.82 : isSquash ? 1.15 : 1.0;
+  const shadowOpacity = reducedMotion ? 0.14 : isApex ? 0.08 : isAir ? 0.11 : isSquash ? 0.18 : 0.14;
 
   const sleeping = expression === 'sleepy' || pose === 'sleep';
   const blink = sleeping || (!reducedMotion && (time + index * 0.47) % 4.2 > 4.04);
-  const shadowScale = reducedMotion ? 1 : Math.max(0.55, 1 + bounce / 130);
-  const shadowOpacity = reducedMotion ? 0.12 : Math.max(0.05, 0.14 + bounce / 600);
 
   return (
-    <g transform={`translate(${x} ${y}) scale(${flip ? -scale : scale} ${scale}) rotate(${rotation})`} data-story-character={id}>
-      {/* Contact Shadow under feet and tail */}
-      {shadow ? <ellipse cx="10" cy="2" rx={110 * shadowScale} ry={16 * shadowScale} fill="#596b51" opacity={shadowOpacity} /> : null}
+    <g
+      transform={`translate(${x} ${y}) scale(${flip ? -scale : scale} ${scale}) rotate(${rotation})`}
+      data-story-character={id}
+    >
+      {/* Dynamic contact shadow under kangaroo feet and tail */}
+      {shadow ? (
+        <ellipse
+          cx="0"
+          cy="0"
+          rx={88 * shadowScale}
+          ry={13 * shadowScale}
+          fill="#596b51"
+          opacity={shadowOpacity}
+        />
+      ) : null}
 
-      {/* Main Body Rig with Squash & Bounce */}
-      <g transform={`translate(0 ${-188 + bounce}) rotate(${tilt}) scale(${finalSquashX * 0.82} ${finalSquashY * 0.82})`}>
-        {/* 1. Tail (Layer 1: Behind body, anchored at hip, sweeping onto the bed) */}
-        <g transform={`translate(-68 95) rotate(${tailSwing} 10 10)`}>
-          <image href={tailDataUri} width="220" height="220" x="-180" y="-35" />
-        </g>
+      {/* Main Joey Artwork: Unified Watercolor Strip Frame */}
+      <g transform={`translate(0 ${verticalBounceOffset}) rotate(${tilt}) scale(${finalSquashX} ${finalSquashY})`}>
+        {/* Registered Canvas: width=280, height=560, anchor=(140, 530) so ground contact is at (0, 0) */}
+        <image
+          href={frameUri}
+          width="280"
+          height="560"
+          x="-140"
+          y="-530"
+        />
 
-        {/* 2. Hind Feet (Layer 2: Long macropod kangaroo feet grounded under leg cuffs) */}
-        <g>
-          {/* Near foot (3/4 angle) */}
-          <image href={footLeftDataUri} width="122" height="102" x="-68" y="142" />
-          {/* Far foot (extending horizontally forward) */}
-          <image href={footRightDataUri} width="154" height="94" x="28" y="136" />
-        </g>
+        {/* Expressive Eyelids during blink / sleep for Frame 5 */}
+        {blink && frameIndex === 5 ? (
+          <g>
+            {/* Soft cream lid patch covering pupil */}
+            <ellipse cx="50" cy="-284" rx="7.5" ry="6" fill="#f6d3a5" />
+            {/* Eyelid seam curve */}
+            <path
+              d="M 42 -283 Q 50 -280 58 -283"
+              stroke="#493224"
+              strokeWidth="2.8"
+              fill="none"
+              strokeLinecap="round"
+            />
+          </g>
+        ) : null}
 
-        {/* 3. Torso (Layer 3: Pajamas with 5 distinct colorways and star pattern) */}
-        <g>
-          <image href={torsoUri} width="182" height="284" x="-91" y="-100" />
-        </g>
-
-        {/* 4. Left Arm & Paw (Seamless shoulder pivot, no socket holes) */}
-        <g transform={`translate(-42 -72) rotate(${leftArm})`}>
-          <image href={armLeftUri} width="101" height="165" x="-46" y="-14" />
-        </g>
-
-        {/* 5. Right Arm & Paw (Seamless shoulder pivot, no socket holes) */}
-        <g transform={`translate(38 -72) rotate(${rightArm})`}>
-          <image href={armRightUri} width="110" height="159" x="-42" y="-12" />
-        </g>
-
-        {/* 6. Head with Ears, Muzzle, and Expressive Face */}
-        <g transform="translate(0 -178)">
-          <image href={headDataUri} width="200" height="254" x="-100" y="-155" />
-
-          {/* Expressive Eyelids for Blinking / Sleep */}
-          {blink ? (
-            <g stroke="#493224" strokeWidth="3.5" fill="none" strokeLinecap="round">
-              <path d="M-46 -17 Q-34 -9 -22 -17" />
-              <path d="M21 -17 Q33 -9 45 -17" />
-            </g>
-          ) : null}
-
-          {/* Lip-sync Mouth Phoneme (Aligned with illustrated mouth) */}
-          <Mouth shape={mouth} expression={expression} progress={mouthProgress} />
-        </g>
+        {/* Phoneme Lip-Sync for Frame 5 when talking */}
+        {frameIndex === 5 ? <Mouth shape={mouth} progress={mouthProgress} /> : null}
       </g>
     </g>
   );

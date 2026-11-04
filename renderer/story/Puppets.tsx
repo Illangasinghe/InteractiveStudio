@@ -306,8 +306,8 @@ export function RooPuppet({ id = 'roo-1', x, y, scale = 1, time = 0, pose = 'idl
   </g>;
 }
 
-export function CatPuppet({ x, y, scale = 1, startled = false, time = 0, reducedMotion = false }: { x: number; y: number; scale?: number; startled?: boolean; time?: number; reducedMotion?: boolean }) {
-  return <IllustratedCat x={x} y={y} scale={scale} startled={startled} time={time} reducedMotion={reducedMotion} />;
+export function CatPuppet({ x, y, scale = 1, startled = false, pose = 'sleep', time = 0, reducedMotion = false }: { x: number; y: number; scale?: number; startled?: boolean; pose?: 'sleep' | 'awake' | 'startled'; time?: number; reducedMotion?: boolean }) {
+  return <IllustratedCat x={x} y={y} scale={scale} startled={startled} pose={pose} time={time} reducedMotion={reducedMotion} />;
 }
 
 export function Sparkle({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) {

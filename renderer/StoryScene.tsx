@@ -100,21 +100,29 @@ export function StoryScene({ project, scene, timeSec, backdropTransform, foregro
     actors.has('dad') ? (
       <RooPuppet actor="dad" x={1600} y={930 + yOffset} scale={1.2} time={time} pose={pose} expression={pose === 'surprised' ? 'surprised' : pose === 'phone' ? 'thoughtful' : 'happy'} reducedMotion={reducedMotion} mouth={mouthFor('dad')} mouthProgress={cueProgress} squashX={squashX} squashY={squashY} />
     ) : null;
+  const bedroomCat = (startled = false, pose?: 'sleep' | 'awake' | 'startled') =>
+    !isClinic && !isGarden ? (
+      <CatPuppet x={1780} y={990} scale={0.78} time={time} startled={startled} pose={pose} reducedMotion={reducedMotion} />
+    ) : null;
   const clinicActor = beatId === 'dentist' ? 'dentist' : 'doctor';
   let action;
 
   switch (beatId) {
     case 'establish':
-      action = <>{bedGroup('idle')}{father('idle')}</>;
+      action = (
+        <>
+          {bedGroup('idle')}
+          {father('idle')}
+          {bedroomCat()}
+        </>
+      );
       break;
     case 'bed-bounce':
       action = (
         <>
           {bedGroup(scene.actionId === 'idle' ? 'idle' : 'bounce')}
           {father('idle')}
-          {actors.has('cat') ? (
-            <CatPuppet x={1680} y={960} scale={0.88} time={time} reducedMotion={reducedMotion} />
-          ) : null}
+          {bedroomCat()}
         </>
       );
       break;
@@ -129,6 +137,7 @@ export function StoryScene({ project, scene, timeSec, backdropTransform, foregro
         <>
           {bedGroup('bounce', true)}
           {father(flight > 0.85 ? 'surprised' : 'idle')}
+          {bedroomCat()}
           <RooPuppet
             id={featuredCharacterId}
             x={point.x}
@@ -168,6 +177,7 @@ export function StoryScene({ project, scene, timeSec, backdropTransform, foregro
         <>
           {bedGroup('idle', true)}
           {father('surprised', dadHeadOffset, dadSquashX, dadSquashY)}
+          {bedroomCat(false, isHeadBonk ? 'awake' : 'sleep')}
           <RooPuppet
             id={featuredCharacterId}
             x={point.x}
@@ -203,6 +213,7 @@ export function StoryScene({ project, scene, timeSec, backdropTransform, foregro
         <>
           {bedGroup('idle', true)}
           {father('phone')}
+          {bedroomCat()}
           {!scene.characterIds.includes(featuredCharacterId) ? (
             <RooPuppet id={featuredCharacterId} x={1360} y={925} scale={0.68} time={time} pose="idle" reducedMotion={reducedMotion} />
           ) : null}
@@ -225,10 +236,8 @@ export function StoryScene({ project, scene, timeSec, backdropTransform, foregro
       action = (
         <>
           {bedGroup('bounce')}
-          {actors.has('cat') ? (
-            <CatPuppet x={1680} y={960} scale={0.95} time={time} reducedMotion={reducedMotion} startled={true} />
-          ) : null}
-          <g transform="translate(1670 730)" stroke="#c09b63" strokeWidth="7" fill="none" strokeLinecap="round">
+          {bedroomCat(true)}
+          <g transform="translate(1780 730)" stroke="#c09b63" strokeWidth="7" fill="none" strokeLinecap="round">
             <path d="M-90 9 L-109-9 M-40-15 L-44-41 M42-20 L48-47" />
           </g>
           {father('idle')}
@@ -236,7 +245,12 @@ export function StoryScene({ project, scene, timeSec, backdropTransform, foregro
       );
       break;
     case 'empty-bed':
-      action = <>{father('point')}</>;
+      action = (
+        <>
+          {father('point')}
+          {bedroomCat()}
+        </>
+      );
       break;
     case 'trampoline':
     case 'family-finale':
@@ -251,7 +265,7 @@ export function StoryScene({ project, scene, timeSec, backdropTransform, foregro
       );
       break;
     default:
-      action = <>{bedGroup('idle')}{father('idle')}</>;
+      action = <>{bedGroup('idle')}{father('idle')}{bedroomCat()}</>;
   }
 
   return (

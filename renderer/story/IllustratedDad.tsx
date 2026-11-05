@@ -1,6 +1,13 @@
 import { memo } from 'react';
 import type { MouthCue } from '../../packages/core/index';
-import { daddyKangarooDataUri, daddyKangarooPhoneDataUri, daddyKangarooSurprisedDataUri } from './assets/storyAssets';
+import {
+  daddyKangarooDataUri,
+  daddyKangarooPhoneDataUri,
+  daddyKangarooSurprisedDataUri,
+  daddyKangarooIdle0DataUri,
+  daddyKangarooIdle1DataUri,
+  daddyKangarooIdle2DataUri,
+} from './assets/storyAssets';
 
 type MouthShape = MouthCue['value'];
 type Pose = 'idle' | 'surprised' | 'phone' | 'point' | 'wave' | 'bounce' | 'leap' | 'sleep' | 'moonwalk' | 'carry';
@@ -40,20 +47,45 @@ export const IllustratedDad = memo(function IllustratedDad({
   const breath = reducedMotion ? 0 : Math.sin(time * 1.8) * 2;
   const isPhonePose = pose === 'phone';
   const isSurprisedPose = pose === 'surprised';
-  const dadUri = isSurprisedPose
-    ? daddyKangarooSurprisedDataUri
-    : isPhonePose
-      ? daddyKangarooPhoneDataUri
-      : daddyKangarooDataUri;
 
   // Subtle natural head nod/lip-sync when speaking on the phone or singing
   const isSpeaking = mouth !== 'X' && mouth !== 'A';
   const talkBob = isSpeaking && !reducedMotion ? Math.sin(time * 12) * 1.8 : 0;
 
-  // Surprised pose width/transform alignment (registered to identical feet ground contact)
-  const imageWidth = isSurprisedPose ? 367 : 300;
-  const imageHeight = isSurprisedPose ? 475 : isPhonePose ? 472 : 475;
-  const imageTranslateX = isSurprisedPose ? -197 : -172;
+  // Frame selection: phone, surprised, or 3-pose realistic idle animation strip
+  let dadUri = daddyKangarooDataUri;
+  let imageWidth = 300;
+  let imageHeight = 475;
+  let imageTranslateX = -172;
+
+  if (isSurprisedPose) {
+    dadUri = daddyKangarooSurprisedDataUri;
+    imageWidth = 367;
+    imageHeight = 475;
+    imageTranslateX = -197;
+  } else if (isPhonePose) {
+    dadUri = daddyKangarooPhoneDataUri;
+    imageWidth = 300;
+    imageHeight = 472;
+    imageTranslateX = -172;
+  } else {
+    // 3-pose idle flipbook animation strip:
+    // 0.0s-0.9s: frame 0 (neutral pose)
+    // 0.9s-1.1s: frame 1 (natural blink & soft breath inhale)
+    // 1.1s-1.6s: frame 2 (attentive nod / listening)
+    // 1.6s-2.0s: frame 0 (settling back to neutral)
+    const cycleTime = reducedMotion ? 0 : time % 2.0;
+    if (!reducedMotion && cycleTime >= 0.9 && cycleTime < 1.1) {
+      dadUri = daddyKangarooIdle1DataUri;
+    } else if (!reducedMotion && cycleTime >= 1.1 && cycleTime < 1.6) {
+      dadUri = daddyKangarooIdle2DataUri;
+    } else {
+      dadUri = daddyKangarooIdle0DataUri;
+    }
+    imageWidth = 312;
+    imageHeight = 480;
+    imageTranslateX = -178;
+  }
 
   return (
     <g

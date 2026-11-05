@@ -8,7 +8,7 @@ export const STORY_BEAT_IDS = ['establish', 'bed-bounce', 'leap', 'dad-reaction'
 export const ACTOR_IDS = ['dad', 'mum', 'doctor', 'vet', 'handyman', 'laundry', 'dentist', 'cat'] as const;
 export const STORY_ACTOR_OPTIONS: Record<typeof STORY_BEAT_IDS[number], readonly typeof ACTOR_IDS[number][]> = {
   establish: ['dad'], 'bed-bounce': ['dad', 'cat'], leap: ['dad'], 'dad-reaction': ['dad'], 'dad-phone': ['dad'],
-  'doctor-advice': ['doctor'], 'cat-reaction': ['dad', 'cat'], 'empty-bed': ['dad'], trampoline: ['dad', 'mum'], 'family-finale': ['dad', 'mum'],
+  'doctor-advice': ['doctor', 'vet', 'handyman', 'laundry', 'dentist'], 'cat-reaction': ['dad', 'cat'], 'empty-bed': ['dad'], trampoline: ['dad', 'mum'], 'family-finale': ['dad', 'mum'],
 };
 export const CAMERA_SHOTS = ['wide', 'medium', 'close', 'detail'] as const;
 export const CAMERA_MOVES = ['locked', 'push-in', 'pull-out', 'pan-left', 'pan-right', 'follow-action'] as const;

@@ -85,8 +85,8 @@ export function RooPuppet({ id = 'roo-1', x, y, scale = 1, time = 0, pose = 'idl
   if (actor === 'dad') {
     return <IllustratedDad x={x} y={y} scale={scale} time={time} pose={pose} expression={expression} mouth={mouth} mouthProgress={mouthProgress} reducedMotion={reducedMotion} rotation={rotation} flip={flip} shadow={shadow} squashX={squashX} squashY={squashY} />;
   }
-  if (actor === 'doctor' || actor === 'dentist' || actor === 'vet') {
-    return <IllustratedDoctor x={x} y={y} scale={scale} time={time} pose={pose} expression={expression} mouth={mouth} mouthProgress={mouthProgress} reducedMotion={reducedMotion} rotation={rotation} flip={flip} shadow={shadow} squashX={squashX} squashY={squashY} />;
+  if (actor === 'doctor' || actor === 'dentist' || actor === 'vet' || actor === 'handyman' || actor === 'laundry' || actor === 'mum') {
+    return <IllustratedDoctor actor={actor} x={x} y={y} scale={scale} time={time} pose={pose} expression={expression} mouth={mouth} mouthProgress={mouthProgress} reducedMotion={reducedMotion} rotation={rotation} flip={flip} shadow={shadow} squashX={squashX} squashY={squashY} />;
   }
 
   const role: string | undefined = actor;

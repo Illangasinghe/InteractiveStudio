@@ -2,7 +2,7 @@ import type { EpisodeProject, Scene } from '../packages/core/index';
 import { GardenBackdrop, GardenForeground, MeadowBackdrop, MeadowForeground } from './Backgrounds';
 import { RooPuppet, CatPuppet, Sparkle } from './story/Puppets';
 import { StoryBedroomSet, StoryBedForeground, StoryClinicSet, RestIllustration } from './story/Sets';
-import { STORY_FOCUS, type StoryDirective } from './story/types';
+import { STORY_FOCUS, type StoryDirective, type StoryActorId } from './story/types';
 
 export { STORY_FOCUS } from './story/types';
 
@@ -104,7 +104,7 @@ export function StoryScene({ project, scene, timeSec, backdropTransform, foregro
     !isClinic && !isGarden ? (
       <CatPuppet x={1780} y={990} scale={0.78} time={time} startled={startled} pose={pose} reducedMotion={reducedMotion} />
     ) : null;
-  const clinicActor = beatId === 'dentist' ? 'dentist' : 'doctor';
+  const clinicActor = (scene.story?.actorIds.find(a => ['doctor', 'vet', 'handyman', 'laundry', 'dentist'].includes(a)) ?? (beatId === 'dentist' ? 'dentist' : 'doctor')) as Exclude<StoryActorId, 'cat'>;
   let action;
 
   switch (beatId) {

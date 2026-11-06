@@ -149,12 +149,12 @@ export function IllustratedJoey({
 
       {/* Main Joey Artwork: Unified Watercolor Strip Frame */}
       <g transform={`translate(0 ${verticalBounceOffset}) rotate(${tilt}) scale(${finalSquashX} ${finalSquashY})`}>
-        {/* Registered Canvas: width=280, height=560, anchor=(140, 530) so ground contact is at (0, 0) */}
+        {/* Registered Canvas: width=340, height=560, anchor=(180, 530) so ground contact is at (0, 0) */}
         <image
           href={frameUri}
-          width="280"
+          width="340"
           height="560"
-          x="-140"
+          x="-180"
           y="-530"
         />
 

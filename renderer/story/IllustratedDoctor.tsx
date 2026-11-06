@@ -61,47 +61,47 @@ export const IllustratedDoctor = memo(function IllustratedDoctor({
   const talkBob = isSpeaking && !reducedMotion ? Math.sin(time * 12) * 1.5 : 0;
 
   let docUri = doctorKangarooDataUri;
-  let imageWidth = 310;
+  let imageWidth = 252;
   let imageHeight = 441;
-  let translateX = -155;
+  let translateX = -126;
 
   if (actor === 'vet') {
     docUri = vetKangarooDataUri;
-    imageWidth = 215;
+    imageWidth = 230;
     imageHeight = 441;
-    translateX = -107;
+    translateX = -115;
   } else if (actor === 'handyman') {
     docUri = handymanKangarooDataUri;
-    imageWidth = 200;
-    imageHeight = 441;
-    translateX = -100;
-  } else if (actor === 'laundry') {
-    docUri = laundryKangarooDataUri;
-    imageWidth = 183;
-    imageHeight = 441;
-    translateX = -91;
-  } else if (actor === 'dentist') {
-    docUri = dentistKangarooDataUri;
-    imageWidth = 189;
-    imageHeight = 441;
-    translateX = -94;
-  } else if (actor === 'mum') {
-    docUri = mommyKangarooDataUri;
     imageWidth = 216;
     imageHeight = 441;
     translateX = -108;
+  } else if (actor === 'laundry') {
+    docUri = laundryKangarooDataUri;
+    imageWidth = 201;
+    imageHeight = 441;
+    translateX = -100;
+  } else if (actor === 'dentist') {
+    docUri = dentistKangarooDataUri;
+    imageWidth = 206;
+    imageHeight = 441;
+    translateX = -103;
+  } else if (actor === 'mum') {
+    docUri = mommyKangarooDataUri;
+    imageWidth = 231;
+    imageHeight = 441;
+    translateX = -115;
   } else {
     // doctor
     if (isAdvicePose) {
       docUri = doctorKangarooAdviceDataUri;
-      imageWidth = 285;
+      imageWidth = 269;
       imageHeight = 441;
-      translateX = -145;
+      translateX = -135;
     } else {
       docUri = doctorKangarooDataUri;
-      imageWidth = 310;
+      imageWidth = 252;
       imageHeight = 441;
-      translateX = -155;
+      translateX = -126;
     }
   }
 

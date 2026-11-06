@@ -54,20 +54,20 @@ export const IllustratedDad = memo(function IllustratedDad({
 
   // Frame selection: phone, surprised, or 3-pose realistic idle animation strip
   let dadUri = daddyKangarooDataUri;
-  let imageWidth = 300;
-  let imageHeight = 475;
-  let imageTranslateX = -172;
+  let imageWidth = 330;
+  let imageHeight = 480;
+  let imageTranslateX = -165;
 
   if (isSurprisedPose) {
     dadUri = daddyKangarooSurprisedDataUri;
-    imageWidth = 367;
-    imageHeight = 475;
-    imageTranslateX = -197;
+    imageWidth = 375;
+    imageHeight = 480;
+    imageTranslateX = -188;
   } else if (isPhonePose) {
     dadUri = daddyKangarooPhoneDataUri;
-    imageWidth = 300;
-    imageHeight = 472;
-    imageTranslateX = -172;
+    imageWidth = 340;
+    imageHeight = 480;
+    imageTranslateX = -170;
   } else {
     // 3-pose idle flipbook animation strip:
     // 0.0s-0.9s: frame 0 (neutral pose)
@@ -82,9 +82,9 @@ export const IllustratedDad = memo(function IllustratedDad({
     } else {
       dadUri = daddyKangarooIdle0DataUri;
     }
-    imageWidth = 312;
+    imageWidth = 330;
     imageHeight = 480;
-    imageTranslateX = -178;
+    imageTranslateX = -165;
   }
 
   return (
@@ -98,7 +98,7 @@ export const IllustratedDad = memo(function IllustratedDad({
       {/* Main Father Kangaroo Rig */}
       <g transform={`translate(0 ${breath + talkBob}) scale(${squashX} ${squashY})`}>
         {/* Full 2.5D Illustrated Dad Kangaroo with authentic watercolor textures, glasses, and phone pose */}
-        <g transform={`translate(${imageTranslateX} -468)`}>
+        <g transform={`translate(${imageTranslateX} -465)`}>
           <image href={dadUri} width={imageWidth} height={imageHeight} />
         </g>
       </g>

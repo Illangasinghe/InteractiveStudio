@@ -262,3 +262,4 @@ export const GardenButterfly = memo(function GardenButterfly({
     </g>
   );
 });
+

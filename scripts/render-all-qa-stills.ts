@@ -29,6 +29,7 @@ console.log(`Composition: ${composition.id}, ${composition.width}x${composition.
 const stills = [
   { name: 'full_shot01_establish', frame: 45, label: 'Verse 5 - Establish bedroom with Dad idle strip, grounded Cat & ceiling fan' },
   { name: 'full_shot02_v5_head_landing', frame: 430, label: 'Verse 5 - Joey 1 landed on Dad head (bonk & sparkles)' },
+  { name: 'full_shot02b_doctor_advice', frame: 585, label: 'Verse 5 - Doctor advice in clinic with solid uniform and clean legs' },
   { name: 'full_shot03_v4_flip', frame: 915, label: 'Verse 4 - Joey 2 acrobatic 360 backflip' },
   { name: 'full_shot04_v4_cat_reaction', frame: 975, label: 'Verse 4 - Joey 2 lands beside cat, Cat startles with alert lines' },
   { name: 'full_shot05_v3_toy_toss', frame: 1475, label: 'Verse 3 - Joey 3 leaps tossing toy airplane up toward fan' },

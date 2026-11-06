@@ -11,19 +11,19 @@ const clamp = (value: number) => Math.max(0, Math.min(1, value));
 const bedX = (id: string) => 610 + (Math.max(1, Number(id.split('-')[1] ?? 1)) - 1) * 135;
 
 // Key anchor coordinates in the 1920x1080 bedroom world
-const DAD_HEAD_X = 1580;
-const DAD_HEAD_Y = 475;
-const RUG_X = 1360;
-const RUG_Y = 925;
-const CAT_RUG_X = 1580;
-const CAT_RUG_Y = 925;
+const DAD_HEAD_X = 1450;
+const DAD_HEAD_Y = 460;
+const RUG_X = 1260;
+const RUG_Y = 915;
+const CAT_RUG_X = 1450;
+const CAT_RUG_Y = 915;
 const FAN_X = 960;
 const FAN_Y = 130;
 const BED_CENTER_X = 920;
 const BED_CENTER_Y = 780;
 const MOONWALK_START_X = 920;
-const MOONWALK_END_X = 1350;
-const FLOOR_Y = 925;
+const MOONWALK_END_X = 1260;
+const FLOOR_Y = 915;
 
 /**
  * Returns the exact action trajectory for each specific joey incident across the 5 verses.
@@ -163,21 +163,21 @@ export function getStoryFocus(scene: Scene, progress: number) {
   if (beat === 'dad-reaction') {
     if (feat === 'roo-3') {
       // Frame both Dad looking up and the wobbling fan
-      return { x: 1280, y: 520, width: 1350, height: 950 };
+      return { x: 1200, y: 580, width: 1350, height: 920 };
     }
     if (feat === 'roo-4') {
       // Frame wet bedspread and Dad's shock
-      return { x: 1260, y: 650, width: 1350, height: 920 };
+      return { x: 1180, y: 620, width: 1350, height: 920 };
     }
     if (feat === 'roo-5') {
       // Close sympathetic framing on Joey 5's nose and comforting Dad
-      return { x: 1420, y: 760, width: 1100, height: 850 };
+      return { x: 1280, y: 650, width: 1200, height: 900 };
     }
   }
 
   if (beat === 'trampoline') {
     // Perfectly centered, wide cinematic framing of the entire active garden trampoline and parents
-    return { x: 960, y: 560, width: 1880, height: 1040 };
+    return { x: 960, y: 540, width: 1920, height: 1080 };
   }
 
   if (beat === 'family-finale') {
@@ -250,8 +250,8 @@ export function StoryScene({
     actors.has('dad') ? (
       <RooPuppet
         actor="dad"
-        x={1600}
-        y={930 + yOffset}
+        x={1470}
+        y={915 + yOffset}
         scale={1.2}
         time={time}
         pose={pose}
@@ -267,7 +267,7 @@ export function StoryScene({
   // Continuous bedroom cat beside Dad (zero overlap)
   const bedroomCat = (startled = false, pose?: 'sleep' | 'awake' | 'startled') =>
     !isClinic && !isGarden ? (
-      <CatPuppet x={1780} y={990} scale={0.78} time={time} startled={startled} pose={pose} reducedMotion={reducedMotion} />
+      <CatPuppet x={1640} y={930} scale={0.75} time={time} startled={startled} pose={pose} reducedMotion={reducedMotion} />
     ) : null;
 
   // Professional specialist kangaroo in advisory shots
@@ -401,7 +401,7 @@ export function StoryScene({
           />
 
           {/* Verse 1 Bumped Nose Effect */}
-          {feat === 'roo-5' ? <BumpedNoseEffect x={point.x + 8} y={point.y - 105} progress={progress} /> : null}
+          {feat === 'roo-5' ? <BumpedNoseEffect x={point.x + 61} y={point.y - 180} progress={progress} /> : null}
 
           {/* Verse 3 Clattered Toy Airplane on floor/trunk */}
           {feat === 'roo-3' ? <ToyAirplane x={1260} y={930} rotation={28} scale={0.75} /> : null}
@@ -432,7 +432,7 @@ export function StoryScene({
 
           {/* Cat startles, leaps up with paws out and cute alert marks */}
           {bedroomCat(true, 'startled')}
-          <g transform="translate(1780 720)" stroke="#c09b63" strokeWidth="7" fill="none" strokeLinecap="round">
+          <g transform="translate(1640 720)" stroke="#c09b63" strokeWidth="7" fill="none" strokeLinecap="round">
             <path d="M-90 9 L-109-9 M-40-15 L-44-41 M42-20 L48-47" />
           </g>
 
@@ -569,8 +569,8 @@ export function StoryScene({
           {actors.has('dad') ? (
             <RooPuppet
               actor="dad"
-              x={1660}
-              y={940}
+              x={1540}
+              y={930}
               scale={1.10}
               time={time}
               pose="idle"
@@ -581,7 +581,7 @@ export function StoryScene({
           ) : null}
 
           {/* Grounded Pet Cat on sunny grass near Mommy */}
-          <CatPuppet x={390} y={1000} scale={0.65} time={time} pose="awake" reducedMotion={reducedMotion} />
+          <CatPuppet x={390} y={960} scale={0.65} time={time} pose="awake" reducedMotion={reducedMotion} />
 
           {/* Fluttering Garden Butterfly */}
           <GardenButterfly x={430 + Math.sin(time * 3) * 25} y={920 + Math.cos(time * 4) * 18} time={time} />
@@ -639,8 +639,8 @@ export function StoryScene({
           {actors.has('dad') ? (
             <RooPuppet
               actor="dad"
-              x={1660}
-              y={940}
+              x={1540}
+              y={930}
               scale={1.10}
               time={time}
               pose="wave"
@@ -651,7 +651,7 @@ export function StoryScene({
           ) : null}
 
           {/* Grounded Pet Cat on sunny grass */}
-          <CatPuppet x={390} y={1000} scale={0.65} time={time} pose="awake" reducedMotion={reducedMotion} />
+          <CatPuppet x={390} y={960} scale={0.65} time={time} pose="awake" reducedMotion={reducedMotion} />
 
           {/* Fluttering Garden Butterfly */}
           <GardenButterfly x={430 + Math.sin(time * 3) * 25} y={920 + Math.cos(time * 4) * 18} time={time} />
